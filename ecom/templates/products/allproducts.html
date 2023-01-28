@@ -1,0 +1,32 @@
+{%extends 'base/base.html'%}
+
+{%block start%}
+
+<div class="container mt-5 pt-5">
+    <h2> All Products</h2>
+    <hr>
+    {% for cat in allcategory %}
+    <h3>{{cat.category_name | title}}</h3>
+    <hr>
+    <div class="row">
+        {% for product in cat.products.all %}
+        <div class="col-md-3">
+            <figure class="card card-product-grid" style="border: 0.2px solid #808080">
+                <div class="img-wrap"> <img src="/media/{{product.product_image.first.image}}"> </div>
+                <figcaption class="info-wrap border-top">
+                    <a href="{% url 'get_product' product.slug %}" class="title">
+                        <b>{{product.product_name | title}}</b></a>
+                    <div class="price mt-2">Rs Rs {{product.price}}</div> <!-- price-wrap.// -->
+                </figcaption>
+            </figure> <!-- card // -->
+        </div> <!-- col.// -->
+        {%endfor%}
+        
+      
+        
+       
+    </div>
+    {% endfor %}
+
+    </div>
+{%endblock%}

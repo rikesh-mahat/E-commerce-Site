@@ -1,0 +1,139 @@
+{%load static%}
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<title>Recycle Nepal</title>
+
+<link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+
+<!-- jQuery -->
+<script src="/media/js/jquery-2.0.0.min.js" type="text/javascript"></script>
+
+<!-- Bootstrap4 files-->
+<script src="/media/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<link href="/media/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+
+<!-- Font awesome 5 -->
+<link href="/media/fonts/fontawesome/css/all.min.css" type="text/css" rel="stylesheet">
+
+<!-- custom style -->
+<link href="/media/css/ui.css" rel="stylesheet" type="text/css"/>
+<link href="/media/css/responsive.css" rel="stylesheet" />
+
+<!-- custom javascript -->
+<script src="/media/js/script.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+/// some script
+
+// jquery ready start
+$(document).ready(function() {
+	// jQuery code
+
+}); 
+// jquery end
+</script>
+
+</head>
+<body>
+
+	<header class="section-header">
+
+		<nav class="navbar navbar-dark navbar-expand p-0 bg-dark">
+		<div class="container">
+			<ul class="navbar-nav d-none d-md-flex mr-auto">
+				<li class="nav-item"><a class="nav-link" href="{%url 'home'%}">Home</a></li>
+				<li class="nav-item"><a class="nav-link" href="#">Delivery</a></li>
+				<li class="nav-item"><a class="nav-link" href="#">Payment</a></li>
+				<li class="nav-item"><a class="nav-link" href="{%url 'all_category'%}">All Category</a></li>
+			</ul>
+			<!-- list-inline //  -->
+		  </div> <!-- navbar-collapse .// -->
+		 <!-- container //  -->
+		</nav> <!-- header-top-light.// -->
+		
+		<section class="header-main border-bottom" style="display:flex; align-items:center; justify-content:space-between; padding-right:5rem;">
+			<div class="container">
+		<div class="row align-items-center">
+			<div class="col-lg-2 col-4">
+				<div class="brand-wrap">
+					<img class="logo" src="images/logo.png">
+				</div> <!-- brand-wrap.// -->
+			</div>
+			<div class="col-lg-6 col-sm-12">
+				<form action="#" class="search">
+					<div class="input-group w-100">
+						<input type="text" class="form-control" placeholder="Search">
+						<div class="input-group-append">
+						  <button class="btn btn-primary" type="submit">
+							<i class="fa fa-search"></i>
+						  </button>
+						</div>
+					</div>
+				</form> <!-- search-wrap .end// -->
+			</div> <!-- col.// -->
+			<div class="col-lg-4 col-sm-6 col-8" style="display:flex; justify-content:space-between; padding-left:3rem;">
+				<div class="widgets-wrap float-md-right">
+					<div class="widget-header  mr-3">
+
+						<a href="{% url 'cart' %}" class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></a>
+						<span class="badge badge-pill badge-danger notify">{{request.session.total_cart_items}}</span>
+
+					</div>
+					<div class="widget-header icontext">
+						<!-- Drop down test -->
+						
+						<!-- <a href="#" class="icon icon-sm rounded-circle border"><i class="fa fa-user"></i></a> -->
+						<!-- <div class="text">
+							<span class="text-muted">Welcome {{request.user.first_name | capfirst}}!</span>
+							<div> 
+								 <a href="{%url 'login'%}">Sign in</a> |  
+								<a href="{%url 'register'%}"> Register</a>
+							</div>
+						</div> -->
+					</div>
+				</div> <!-- widgets-wrap.// -->
+			</div> 
+			<!-- col.// -->
+		</div> <!-- row.// -->
+		
+			</div> <!-- container.// -->
+
+			{%if request.user.profile %}
+			<div class="dropdown">
+				<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				  {{request.user.first_name | title}}
+				</button>
+				<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+				  <a class="dropdown-item" href="{% url 'customer_profile'%}"><i class="fa fa-edit"></i>&nbsp;Profile </a>
+				  <a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i>&nbsp;Logout</a>
+				</div>
+			  </div>
+			  {%else%}
+			  <a class="btn btn-primary" href="{% url 'register'%}">Join</a>
+			{%endif%}
+		</section> <!-- header-main .// -->
+		
+		</header>
+
+
+
+		{% block start %}
+
+		{% endblock %}
+
+
+
+
+
+
+
+
+
+
+        </body>
+        </html>
+        
