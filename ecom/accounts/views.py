@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import login, authenticate, logout
 import uuid
 from base.emails import send_account_activation_mail
-from . models import Profile, Cart, CartItems, Order
+from . models import Profile, Cart, CartItems, Order, ORDER_STATUS
 from django.http import HttpResponseRedirect
 from products.models import Product
 from django.urls import reverse
@@ -28,7 +28,7 @@ def load_cart(request):
     if request.user.id:
         user = request.user
         cartObj = Cart.objects.filter(user = user)
-        print(cartObj[len(cartObj)-1])
+        
         # if not cartObj[0].is_checkedout:
          
         #     user_carts = request.user.carts.all()
@@ -237,4 +237,104 @@ def checkout_cart(request):
 
 
 def customer_profile(request):
-    return render(request, 'accounts/profile.html')
+    userObj = request.user
+    user = User.objects.get(id = userObj.id)
+    
+    orders = Order.objects.filter(cart__user = user)
+    context ={
+        'orders' : orders,
+    }
+    
+    if request.method == "POST":
+        first_name = request.POST.get('fname')
+        last_name = request.POST.get('lname')
+        email = request.POST.get('email')
+        mobile = request.POST.get('mobile')
+        address = request.POST.get('address')
+        
+        
+        
+        
+        user.email = email
+        user.first_name = first_name
+        user.last_name = last_name
+        user.username = email
+        user.save()
+       
+        
+        
+        profile = Profile.objects.get(user = user)
+        profile.address = address
+        profile.mobile = mobile
+        profile.save()
+        
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
+        
+        
+    return render(request, 'accounts/profile.html', context)
+
+
+def admin_login(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        user_obj = User.objects.filter(username = email)
+        
+        if not user_obj.exists():
+            messages.warning(request, "No such admin account exists")
+            return HttpResponseRedirect(request.path_info)
+        
+        user_obj = authenticate(username = email, password = password)
+        
+        if user_obj:
+            login(request, user_obj)
+            return redirect('admin_dashboard')
+        
+        messages.warning(request,"Sorry the credentials do not match")
+        return HttpResponseRedirect(request.path_info)
+            
+    return render(request, 'adminpages/admin_login.html')
+
+def admin_dashboard(request):
+    if not request.user.is_authenticated:
+        return redirect('admin_login')
+    pending_orders = Order.objects.filter(order_status = "Order Received").order_by("-created_at")
+    context = {
+        'pending_orders' : pending_orders
+    }    
+    return render(request, 'adminpages/admin_dashboard.html', context)
+
+
+def order_details(request, uid):
+    if not request.user.is_authenticated:
+        return redirect('admin_login')
+    orderObj = Order.objects.get(uid = uid)
+    orderItems = orderObj.cart.cart_items.all()
+    context = {
+        'order' : orderObj,
+        'orderitems' : orderItems,
+    }
+    return render(request, 'adminpages/orderdetail.html', context)
+
+
+
+
+def edit_order_details(request, uid):
+    if not request.user.is_authenticated:
+        return redirect('admin_login')
+    orderObj = Order.objects.get(uid = uid)
+    allstatus = ORDER_STATUS
+    
+    context = {
+        'order' : orderObj,
+        'allstatus' : allstatus,
+    }
+    
+    if request.method == "POST":
+        status = request.POST.get('status')
+        orderObj.order_status = status
+        orderObj.save()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
+    
+    return render(request, 'adminpages/editorderdetail.html', context)

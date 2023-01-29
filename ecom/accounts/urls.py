@@ -1,6 +1,5 @@
 from django.urls import path
-from .views import login_user, register_user, activate_user, add_to_cart, cart, remove_cart, checkout_cart, logout_user, customer_profile
-
+from .views import *
 
 urlpatterns = [
     path('login/', login_user, name='login'),
@@ -11,5 +10,9 @@ urlpatterns = [
     path('add-to-cart/<uid>/', add_to_cart, name='add_to_cart'),
     path('remove-cart/<cart_item_uid>/', remove_cart, name='remove_cart'),
     path('checkout-cart/', checkout_cart, name='checkout-cart'),
-    path('profile/', customer_profile, name='customer_profile')
+    path('profile/', customer_profile, name='customer_profile'),
+    path('admin-login/', admin_login, name = "admin_login"),
+    path('admin-dashboard/', admin_dashboard, name = "admin_dashboard"),
+    path('admin-order/<uid>/', order_details, name="order_details"),
+    path('edit-admin-order/<uid>/', edit_order_details, name="edit_order_details")
 ]

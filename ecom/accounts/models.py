@@ -6,7 +6,7 @@ from django.dispatch import receiver
 
 from products.models import Product
 # Create your models here.
-
+    
 class Profile(BaseModel):
     user  = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     is_email_verified = models.BooleanField(default=False)
