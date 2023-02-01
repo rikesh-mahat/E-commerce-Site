@@ -27,14 +27,11 @@ def assign_cart(request):
 def load_cart(request):
     if request.user.id:
         user = request.user
-        cartObj = Cart.objects.filter(user = user)
-        
-        # if not cartObj[0].is_checkedout:
-         
-        #     user_carts = request.user.carts.all()
-            
-        #     request.session['cart.uid'] = str(user_carts[0].uid)
-        #     request.session['total_cart_items'] = user_carts[0].get_total_cartitems()
+        cartObj = Cart.objects.filter(user = user).order_by('created_at')
+        if not cartObj[0].is_checkedout:
+            user_carts = request.user.carts.all()
+            request.session['cart.uid'] = str(user_carts[0].uid)
+            request.session['total_cart_items'] = user_carts[0].get_total_cartitems()
            
 
 def login_user(request):
@@ -240,7 +237,7 @@ def customer_profile(request):
     userObj = request.user
     user = User.objects.get(id = userObj.id)
     
-    orders = Order.objects.filter(cart__user = user)
+    orders = Order.objects.filter(cart__user = user).order_by('-created_at')
     context ={
         'orders' : orders,
     }
@@ -338,3 +335,15 @@ def edit_order_details(request, uid):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
     
     return render(request, 'adminpages/editorderdetail.html', context)
+
+
+
+def view_order(request, uid):
+    orderObj = Order.objects.get(uid = uid)
+    order_items = CartItems.objects.filter(cart = orderObj.cart)
+    context = {
+        'items' : order_items,
+        'order' : orderObj,
+    }
+    
+    return render(request, 'accounts/view_order.html', context)

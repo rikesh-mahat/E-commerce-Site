@@ -14,5 +14,6 @@ urlpatterns = [
     path('admin-login/', admin_login, name = "admin_login"),
     path('admin-dashboard/', admin_dashboard, name = "admin_dashboard"),
     path('admin-order/<uid>/', order_details, name="order_details"),
-    path('edit-admin-order/<uid>/', edit_order_details, name="edit_order_details")
+    path('edit-admin-order/<uid>/', edit_order_details, name="edit_order_details"),
+    path('view-order/<uid>', view_order, name="view_order")
 ]

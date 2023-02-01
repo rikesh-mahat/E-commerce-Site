@@ -1,0 +1,56 @@
+{% extends 'base/base.html' %}
+
+{%block start%}
+<div class="container" style="margin-top:2rem">
+
+    
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Pending Orders</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>S.N.</th>
+                        <th>Product Name</th>
+                        <th>Ordered By</th>
+                        <th>Shipping Address</th>
+                        <th>Price</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in items%}
+                    <tr>
+                        <td>{{forloop.counter}}</td>
+                        <td>{{order.product.product_name}}</td>
+                        <td>{{request.user.first_name | title}} {{request.user.last_name | title}}</td>
+                        <td>{{request.user.profile.address}}</td>
+                        <td>{{order.product.price}}</td>
+                    </tr>
+                   {%endfor%}
+                </tbody>
+            </table>
+            </div>   
+    </div>
+    
+
+ 
+                <dl class="dlist-align">
+                  <dt>Total Items:</dt>
+                  <dd class="text-left"><strong>{{order.cart.get_total_cartitems}}</strong></dd>
+                </dl>
+                 
+                <dl class="dlist-align">
+                  <dt>Total Price:</dt>
+                  <dd class="text-left  h5"><strong>{{order.total}}</strong></dd>
+                </dl>
+                
+               
+                
+  
+
+    </div>
+
+   
+{%endblock%}

@@ -64,9 +64,13 @@ $(document).ready(function() {
 				</div> <!-- brand-wrap.// -->
 			</div>
 			<div class="col-lg-6 col-sm-12">
-				<form action="#" class="search">
+
+
+
+				{% comment %} Search form {% endcomment %}
+				<form action="#" class="search" method="GET">
 					<div class="input-group w-100">
-						<input type="text" class="form-control" placeholder="Search">
+						<input type="text" class="form-control" placeholder="Search for product" name="keyword" required>
 						<div class="input-group-append">
 						  <button class="btn btn-primary" type="submit">
 							<i class="fa fa-search"></i>
@@ -74,6 +78,9 @@ $(document).ready(function() {
 						</div>
 					</div>
 				</form> <!-- search-wrap .end// -->
+
+
+
 			</div> <!-- col.// -->
 			<div class="col-lg-4 col-sm-6 col-8" style="display:flex; justify-content:space-between; padding-left:3rem;">
 				<div class="widgets-wrap float-md-right">

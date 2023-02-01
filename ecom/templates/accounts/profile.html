@@ -68,6 +68,7 @@
                         <th>Total</th>
                         <th>Ordered on</th>
                         <th>Status</th>
+                        <th>Action</th>
                         
                     </tr>
                 </thead>
@@ -82,6 +83,7 @@
                         <td>Rs {{order.total}}</td>
                         <td>{{order.created_at | timesince}} ago</td>
                         <td>{{order.order_status}}</td>
+                        <td><a class="btn btn-primary" href="{% url 'view_order' order.uid %}">View</a></td>
                     </tr>
                     {%endfor%}
                 </tbody>
