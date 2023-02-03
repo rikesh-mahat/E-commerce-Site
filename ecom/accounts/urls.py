@@ -15,5 +15,8 @@ urlpatterns = [
     path('admin-dashboard/', admin_dashboard, name = "admin_dashboard"),
     path('admin-order/<uid>/', order_details, name="order_details"),
     path('edit-admin-order/<uid>/', edit_order_details, name="edit_order_details"),
-    path('view-order/<uid>', view_order, name="view_order")
+    path('view-order/<uid>/', view_order, name="view_order"),
+    path('search/', search_items, name = "search"),
+    path('esewa-request/', esewa_request, name = 'esewa'),
+    path('esewa-verify/', esewa_verify, name = 'esewa_verify')
 ]

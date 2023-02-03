@@ -1,0 +1,17 @@
+{% extends 'base/base.html' %}
+
+{%block start%}
+<form action="https://uat.esewa.com.np/epay/main" method="POST">
+    {%csrf_token%}
+    <input value="{{order.total}}" name="tAmt" >
+    <input value="{{order.total}}" name="amt" >
+    <input value="0" name="txAmt" >
+    <input value="0" name="psc" >
+    <input value="0" name="pdc" >
+    <input value="EPAYTEST" name="scd">
+    <input value="{{order.uid}}" name="pid" >
+    <input value="http://127.0.0.1:8000/accounts/esewa-verify/" name="su">
+    <input value="{{request.build_absolute_uri}}"  name="fu">
+    <input value="Submit" type="submit">
+    </form>
+{%endblock%}

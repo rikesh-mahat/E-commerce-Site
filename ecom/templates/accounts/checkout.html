@@ -57,7 +57,18 @@
                     <label> <h5>Shipping Address</h5></label>
                     <input name="address" value = "{{request.user.profile.address}}" class="form-control" placeholder="Shipping Address" type="text" required>
                   </div> <!-- form-group// -->
-                  
+
+                  <div class="form-group">
+                  <select name="payment" class="dropdown">
+                    {%for i, j in payments %}
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <option class="dropdown-item" value = "{{i}}" {%if i == order.order_status%}selected{%endif%}>{{j}}</option>
+                    </div>
+    
+                    {%endfor%}
+                   </select>
+                </div> <!-- form-group// -->
+
                   <div class="form-group">
                       <button type="submit" class="btn btn-primary btn-block">Place Order  </button>
                   </div> <!-- form-group// -->    

@@ -5,12 +5,14 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import login, authenticate, logout
 import uuid
+from django.db.models import Q
 from base.emails import send_account_activation_mail
-from . models import Profile, Cart, CartItems, Order, ORDER_STATUS
+from . models import Profile, Cart, CartItems, Order, ORDER_STATUS, PAYMENT
 from django.http import HttpResponseRedirect
 from products.models import Product
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+import requests as req
 
 
 # Create your views here.
@@ -28,10 +30,11 @@ def load_cart(request):
     if request.user.id:
         user = request.user
         cartObj = Cart.objects.filter(user = user).order_by('created_at')
-        if not cartObj[0].is_checkedout:
-            user_carts = request.user.carts.all()
-            request.session['cart.uid'] = str(user_carts[0].uid)
-            request.session['total_cart_items'] = user_carts[0].get_total_cartitems()
+        if cartObj.count():
+            if not cartObj[0].is_checkedout:
+                user_carts = request.user.carts.all()
+                request.session['cart.uid'] = str(user_carts[0].uid)
+                request.session['total_cart_items'] = user_carts[0].get_total_cartitems()
            
 
 def login_user(request):
@@ -214,6 +217,7 @@ def checkout_cart(request):
     context ={
         'items' : cartObj.cart_items.all(),
         'cart': cartObj,
+        'payments' : PAYMENT,
     }
     
     if request.method == "POST":
@@ -223,16 +227,55 @@ def checkout_cart(request):
         mobile  = request.POST.get("mobile")
         shipping_address = request.POST.get("address")
         total = cartObj.get_cart_total()
+        
         orderObj = Order.objects.create(cart = cart, ordered_by = ordered_by, shipping_address = shipping_address, mobile = mobile, email = email, total = total)
         orderObj.save()
         cart.is_checkedout = True
         cart.save()
         del request.session['cart.uid']
         request.session['total_cart_items'] = 0
+        payment = request.POST.get('payment')
+        
+        if payment == "Esewa":
+            return redirect(reverse('esewa') + '?o_id=' + str(orderObj.uid))
+        
         return redirect('home')
     return render(request, 'accounts/checkout.html', context)
 
+def esewa_request(request):
+    o_id = request.GET.get('o_id')
+    order = Order.objects.get(uid = o_id)
+    context = {
+        'order' : order
+    }
+    return render(request, 'accounts/esewa.html', context)
 
+
+def esewa_verify(request):
+    import xml.etree.ElementTree as ET
+    o_id = request.GET.get('o_id')
+    amt = request.GET.get('amt')
+    refId = request.GET.get('refId')
+    url ="https://uat.esewa.com.np/epay/transrec"
+    d = {
+        'amt': amt,
+        'scd': 'EPAYTEST',
+        'rid': refId,
+        'pid': o_id,
+    }
+    resp = req.post(url, d)
+    root = ET.fromstring(resp.content)
+    status = root[0].strip()
+    
+    order_id = o_id.split('_')[1]
+    orderObj = Order.objects.get(uid = order_id)
+    if status == 'Success':
+        orderObj.payment_completed = True
+        orderObj.save()
+        return redirect('home')
+    else:
+        return redirect('/esewa-request/?o_id='+str(order_id))  
+    return redirect('home')
 def customer_profile(request):
     userObj = request.user
     user = User.objects.get(id = userObj.id)
@@ -347,3 +390,16 @@ def view_order(request, uid):
     }
     
     return render(request, 'accounts/view_order.html', context)
+
+
+def search_items(request):
+    
+    if request.method == "GET":
+        keyword = request.GET.get('keyword')
+        results = Product.objects.filter(Q(product_name__icontains = keyword))
+        context = {
+            'keyword' : keyword,
+            'results' : results,
+        }
+    return render(request, 'products/search.html', context)
+

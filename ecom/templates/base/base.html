@@ -68,7 +68,8 @@ $(document).ready(function() {
 
 
 				{% comment %} Search form {% endcomment %}
-				<form action="#" class="search" method="GET">
+				<form  class = "search" method="GET" action="{% url 'search'%}">
+					
 					<div class="input-group w-100">
 						<input type="text" class="form-control" placeholder="Search for product" name="keyword" required>
 						<div class="input-group-append">

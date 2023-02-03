@@ -60,7 +60,12 @@ ORDER_STATUS = (
     ("Order Completed","Order Completed"),
     ("Order Cancelled","Order Cancelled"),
 ) 
-    
+
+PAYMENT = (
+    ("Cash On Delivery", "Cash On Delivery"),
+    ("Khalti", "Khalti"),
+    ("Esewa", "Esewa"),
+)  
 class Order(BaseModel):
     cart = models.OneToOneField(Cart, on_delete=models.CASCADE, null=True, blank=True,related_name='orders')
     ordered_by = models.CharField(max_length=200)
@@ -69,7 +74,7 @@ class Order(BaseModel):
     email = models.EmailField(null = True, blank=True)
     total = models.PositiveIntegerField()
     order_status = models.CharField(max_length=50, choices = ORDER_STATUS, default = ORDER_STATUS[0][0])
-    
-    
+    payment_method = models.CharField(max_length = 50, choices = PAYMENT, default = PAYMENT[0][0])
+    payment_completed = models.BooleanField(default=False, null = True, blank = True)
     def __str__(self):
         return "Order: " + str(self.uid)
