@@ -99,7 +99,7 @@
             <!-- col.// -->
         </div> <!-- row.// -->
     
-        <a href="#" class="btn  btn-primary" style="font-size:1.3rem"> Buy now </a>&nbsp;&nbsp;
+        <a href="{% url 'buy' product.uid%}" class="btn  btn-primary" style="font-size:1.3rem"> Buy now </a>&nbsp;&nbsp;
         <a href="{%url 'add_to_cart' product.uid%}" class="btn  btn-outline-primary" style="font-size:1.3rem"> <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </a>
     </article> <!-- product-info-aside .// -->
             </main> <!-- col.// -->

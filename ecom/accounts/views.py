@@ -403,3 +403,46 @@ def search_items(request):
         }
     return render(request, 'products/search.html', context)
 
+@login_required()
+def buy_item(request, uid):
+    
+    
+    productObj = Product.objects.get(uid = uid)
+    user = request.user
+    
+    # cart create gardiney ani sidhai checkout ma haldiney tyo cart lai done
+    
+    cart = Cart.objects.create(user = user, is_checkedout = True)
+    
+    # item in cart
+    CartItems.objects.create(cart = cart, product = productObj)
+    
+    # context pass gardiney checkout form lai
+    context ={
+        'items' : cart.cart_items.all(),
+        'cart': cart,
+        'payments' : PAYMENT,
+    }
+    if request.method == "POST":
+        cart = cart
+        ordered_by = request.POST.get("username")
+        email = request.POST.get("email")
+        mobile  = request.POST.get("mobile")
+        shipping_address = request.POST.get("address")
+        total = cart.get_cart_total()
+        
+        orderObj = Order.objects.create(cart = cart, ordered_by = ordered_by, shipping_address = shipping_address, mobile = mobile, email = email, total = total)
+        orderObj.save()
+        
+        payment = request.POST.get('payment')
+        
+        if payment == "Esewa":
+            return redirect(reverse('esewa') + '?o_id=' + str(orderObj.uid))
+        
+    
+   
+    return render(request, 'accounts/checkout.html', context)
+    
+    
+        
+    

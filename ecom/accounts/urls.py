@@ -18,5 +18,6 @@ urlpatterns = [
     path('view-order/<uid>/', view_order, name="view_order"),
     path('search/', search_items, name = "search"),
     path('esewa-request/', esewa_request, name = 'esewa'),
-    path('esewa-verify/', esewa_verify, name = 'esewa_verify')
+    path('esewa-verify/', esewa_verify, name = 'esewa_verify'),
+    path('buy_product/<uid>/', buy_item, name="buy"),
 ]
