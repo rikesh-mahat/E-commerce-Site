@@ -15,7 +15,6 @@
     <tr class="small text-uppercase">
         {%if cart.get_total_cartitems %}
       <th scope="col">Product</th>
-      {% comment %} <th scope="col" width="120">Quantity</th> {% endcomment %}
       <th scope="col" width="120">Price</th>
       <th scope="col" class="text-right" width="200"> </th>
       {%endif%}
@@ -33,19 +32,10 @@
                 </figcaption>
             </figure>
         </td>
-        {% comment %} <td> 
-            <select class="form-control">
-                <option>1</option>
-                <option>2</option>	
-                <option>3</option>	
-                <option>4</option>	
-            </select> 
-        </td> {% endcomment %}
+
         <td> 
             <div class="price-wrap"> 
-            
                 <var class="price">{{item.product.price}}</var> 
-                {% comment %} <small class="text-muted"> $315.20 each </small>  {% endcomment %}
             </div> <!-- price-wrap .// -->
         </td>
         <td class="text-right"> 
@@ -65,27 +55,6 @@
     </div>	
     </div> <!-- card.// -->
     <br>
-    {% comment %} <div class="alert alert-success mt-3">
-        <p class="icontext"><i class="icon text-success fa fa-truck"></i> Free Delivery within 1-2 weeks</p>
-    </div> {% endcomment %}
-    
-        {% comment %} </main> <!-- col.// -->
-        <aside class="col-md-3">
-            <div class="card mb-3">
-                <div class="card-body">
-                <form>
-                    <div class="form-group">
-                        <label>Have coupon?</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" name="" placeholder="Coupon code">
-                            <span class="input-group-append"> 
-                                <button class="btn btn-primary">Apply</button>
-                            </span>
-                        </div>
-                    </div>
-                </form>
-                </div> <!-- card-body.// -->
-            </div>  <!-- card .// --> {% endcomment %}
             <div class="card">
                 <div class="card-body">
                         <dl class="dlist-align">

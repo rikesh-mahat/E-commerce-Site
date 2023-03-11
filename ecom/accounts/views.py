@@ -1,4 +1,4 @@
-
+from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -7,7 +7,7 @@ from django.contrib.auth import login, authenticate, logout
 import uuid
 from django.db.models import Q
 from base.emails import send_account_activation_mail
-from . models import Profile, Cart, CartItems, Order, ORDER_STATUS, PAYMENT
+from accounts.models import Profile, Cart, CartItems, Order, ORDER_STATUS, PAYMENT
 from django.http import HttpResponseRedirect
 from products.models import Product
 from django.urls import reverse
@@ -52,8 +52,14 @@ def login_user(request):
         if not user_obj[0].profile.is_email_verified:
             messages.warning(request,"Verify your account first")
             return HttpResponseRedirect(request.path_info)
-        user_obj = authenticate(username = email, password = password)
         
+        
+        
+        if not user_obj[0].profile.status:
+            messages.warning(request, "Your account has been disabled")
+            return HttpResponseRedirect(request.path_info)
+        
+        user_obj = authenticate(username = email, password = password)
         if user_obj:
             login(request, user_obj)
             if "next" in request.GET:
@@ -276,6 +282,7 @@ def esewa_verify(request):
     else:
         return redirect('/esewa-request/?o_id='+str(order_id))  
     return redirect('home')
+
 def customer_profile(request):
     userObj = request.user
     user = User.objects.get(id = userObj.id)
@@ -335,6 +342,7 @@ def admin_login(request):
         return HttpResponseRedirect(request.path_info)
             
     return render(request, 'adminpages/admin_login.html')
+
 
 def admin_dashboard(request):
     if not request.user.is_authenticated:
@@ -444,5 +452,28 @@ def buy_item(request, uid):
     return render(request, 'accounts/checkout.html', context)
     
     
-        
-    
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
+def display_users(request):
+    profile_list = Profile.objects.all()
+    paginator = Paginator(profile_list, 1) # Show 10 profiles per page
+    page_number = request.GET.get('page')
+    try:
+        profiles = paginator.page(page_number)
+    except PageNotAnInteger:
+        # If page_number is not an integer, use the first page
+        profiles = paginator.page(1)
+    except EmptyPage:
+        # If page_number is out of range (e.g. 9999), use the last page
+        profiles = paginator.page(paginator.num_pages)
+    return render(request, 'adminpages/users.html', {'profiles': profiles})
+
+def disable_user(request, uid):
+    user = Profile.objects.get(uid = uid)
+    if user.status:
+        user.status = False
+    else:
+        user.status = True
+    user.save()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

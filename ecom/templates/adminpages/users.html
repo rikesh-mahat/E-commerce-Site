@@ -1,0 +1,78 @@
+{% extends 'adminpages/navbar.html' %}
+
+{% block start %}
+  <h1 class="text-center">User Profiles</h1>
+  <div class="table-responsive mx-auto">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email Verified</th>
+          <th>Address</th>
+          <th>Mobile</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for profile in profiles %}
+          <tr>
+            <td>{{ profile.user.username }}</td>
+            <td> {% if profile.status %}
+                <i class="fa fa-check text-success"></i>
+              {% else %}
+                <i class="fa fa-times text-danger"></i>
+              {% endif %}</td>
+            <td>{{ profile.address }}</td>
+            <td>{{ profile.mobile }}</td>
+            <td>
+                {%if profile.status%}
+                <a href="{%url 'disable_user' profile.uid%}" class="btn btn-sm btn-primary">Disable</a>
+                {%else%}
+                <a href="{%url 'disable_user' profile.uid%}" class="btn btn-sm btn-primary">Enable</a>
+                {%endif%}
+              <a href="#" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">No profiles found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <nav>
+        {% if page_obj.has_other_pages %}
+        <ul class="pagination justify-content-end">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Previous</span>
+            </li>
+          {% endif %}
+          
+          {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+              <li class="page-item active"><span class="page-link">{{ num }} <span class="sr-only">(current)</span></span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+          
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Next</span>
+            </li>
+          {% endif %}
+        </ul>
+      {% endif %}
+      
+    </nav>
+  </div>
+{% endblock %}

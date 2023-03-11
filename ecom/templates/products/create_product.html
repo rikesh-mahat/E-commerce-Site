@@ -1,0 +1,64 @@
+{% extends 'base/base.html' %}
+
+
+{% block start %}
+  <div class="container">
+    <h1>Create Product</h1>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="{{ form.product_name.id_for_label }}">Product Name:</label>
+        {{ form.product_name }}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.category.id_for_label }}">Category:</label>
+        {{ form.category }}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.price.id_for_label }}">Price:</label>
+        {{ form.price }}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.product_description.id_for_label }}">Description:</label>
+        {{ form.product_description }}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.product_images.id_for_label }}">Images:</label>
+        {{ form.product_images }}
+        <div id="preview"></div>
+      </div>
+      <button type="submit" class="btn btn-primary">Create Product</button>
+
+     <a href="{%url 'home' %}"class="btn btn-secondary">Cancel</a> 
+
+      <style>
+        #preview img {
+          max-width: 300px;
+          max-height: 300px;
+        }
+      </style>
+
+      <script>
+        const input = document.querySelector('input[type="file"]');
+        input.addEventListener('change', previewImages);
+
+        function previewImages() {
+          const preview = document.querySelector('#preview');
+          preview.innerHTML = '';
+          const files = input.files;
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.addEventListener('load', function() {
+              const image = new Image();
+              image.src = reader.result;
+              preview.appendChild(image);
+            });
+            reader.readAsDataURL(file);
+          }
+        }
+      </script>
+    </form>
+  </div>
+{% endblock %}
+

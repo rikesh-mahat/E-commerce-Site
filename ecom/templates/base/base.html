@@ -92,16 +92,7 @@ $(document).ready(function() {
 
 					</div>
 					<div class="widget-header icontext">
-						<!-- Drop down test -->
-						
-						<!-- <a href="#" class="icon icon-sm rounded-circle border"><i class="fa fa-user"></i></a> -->
-						<!-- <div class="text">
-							<span class="text-muted">Welcome {{request.user.first_name | capfirst}}!</span>
-							<div> 
-								 <a href="{%url 'login'%}">Sign in</a> |  
-								<a href="{%url 'register'%}"> Register</a>
-							</div>
-						</div> -->
+
 					</div>
 				</div> <!-- widgets-wrap.// -->
 			</div> 
@@ -118,6 +109,8 @@ $(document).ready(function() {
 				<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 				  <a class="dropdown-item" href="{% url 'customer_profile'%}"><i class="fa fa-edit"></i>&nbsp;Profile </a>
 				  <a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i>&nbsp;Logout</a>
+				  <a class="dropdown-item" href="{% url 'create_product' %}">&nbsp;Create Product</a>
+				  <a class="dropdown-item" href="{% url 'my_product' %}">&nbsp;My Products</a>
 				</div>
 			  </div>
 			  {%else%}

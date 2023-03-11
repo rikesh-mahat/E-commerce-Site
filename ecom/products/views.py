@@ -1,8 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
-from .models import Product, Category
+from products.models import Product, Category, ProductImages
 from accounts.models import Cart
 from accounts.views import assign_cart, load_cart
+from .forms import ProductForm
+from django.views.generic.edit import UpdateView
+from django.urls import reverse_lazy
+from .forms import ProductForm
 # Create your views here.
 
 def del_buy_cart(request):
@@ -49,3 +53,42 @@ def get_all_products(request):
     return render(request, 'products/allproducts.html', context)
 
 
+
+def create_product(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.owner = request.user  # Set the owner field to the current user
+            product.save()
+            # Save product images
+            for image in request.FILES.getlist('product_images'):
+                ProductImages.objects.create(product=product, image=image)
+            return redirect('home')
+    else:
+        form = ProductForm()
+    return render(request, 'products/create_product.html', {'form': form})
+
+
+
+def display_user_product(request):
+    if request.user.is_authenticated:
+        user_products = Product.objects.filter(owner = request.user)
+        context = {'products' : user_products}
+        print(user_products)
+        return render(request, 'products/user_product.html', context)
+    
+    
+def delete_product(request, uid):
+    if request.user.is_authenticated:
+        product = get_object_or_404(Product, uid = uid)
+        product.delete()
+    # return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
+      
+
+class ProductUpdateView(UpdateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'products/edit_product.html'
+    success_url = reverse_lazy('my_product')

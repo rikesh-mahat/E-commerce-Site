@@ -22,7 +22,7 @@ class Product(BaseModel):
     product_name = models.CharField(max_length=250)
     slug = models.SlugField(unique=True, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
-   
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     price = models.FloatField()
     product_description = models.TextField()
     view_count = models.PositiveIntegerField(default=0)
