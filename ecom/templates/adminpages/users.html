@@ -1,11 +1,13 @@
 {% extends 'adminpages/navbar.html' %}
 
 {% block start %}
+<div class="container">
   <h1 class="text-center">User Profiles</h1>
   <div class="table-responsive mx-auto">
     <table class="table table-striped">
       <thead>
         <tr>
+          <th>Profile Image</th>
           <th>Username</th>
           <th>Email Verified</th>
           <th>Address</th>
@@ -16,6 +18,7 @@
       <tbody>
         {% for profile in profiles %}
           <tr>
+            <td><img src="{{ profile.profile_image.url }}" alt="Profile Image" class="rounded-circle" width="50" height="50"></td>
             <td>{{ profile.user.username }}</td>
             <td> {% if profile.status %}
                 <i class="fa fa-check text-success"></i>
@@ -35,7 +38,7 @@
           </tr>
         {% empty %}
           <tr>
-            <td colspan="5">No profiles found.</td>
+            <td colspan="6">No profiles found.</td>
           </tr>
         {% endfor %}
       </tbody>
@@ -72,7 +75,6 @@
           {% endif %}
         </ul>
       {% endif %}
-      
     </nav>
   </div>
 {% endblock %}

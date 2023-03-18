@@ -4,7 +4,7 @@
 <div class="container mt-3">
   <div class="row">
     <div class="col-md-12">
-      <h2 class="text-center mb-3">Pending Orders</h2>
+      <h2 class="text-center mb-3">All Orders</h2>
       {% if pending_orders %}
       <div class="table-responsive">
         <table class="table table-bordered table-hover">
@@ -22,7 +22,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for order in pending_orders %}
+            {% for order in all_orders %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ order.ordered_by }}</td>
@@ -47,7 +47,7 @@
       </div>
       {% else %}
       <div class="alert alert-info text-center" role="alert">
-        <strong>No pending orders found.</strong>
+        <strong>No orders are registered</strong>
       </div>
       {% endif %}
     </div>

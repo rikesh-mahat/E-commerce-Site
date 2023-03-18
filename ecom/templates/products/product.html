@@ -56,7 +56,62 @@
             </div>
         </div>
     </div>
+<hr>
+<section style="margin-top: 2rem;">
+    <div class="container">
+      <h1 class="text-left mb-5">Comments</h1>
+      {% if product.comments.count %}
+        {% for comment in comments %}
+          <div class="row align-items-center mb-4">
+            <div class="col-md-2 col-3">
+              <img src="{{ comment.user.profile.profile_image.url }}" alt="" class="rounded-circle" width="130" height="130">
+            </div>
+            <div class="col-md-9 col-8">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
+                  <p class="card-text">{{ comment.text }}</p>
+                  <p class="card-text"><small class="text-muted">{{ comment.created_at |timesince }}</small></p>
+                </div>
+              </div>
+            </div>
+            {%if request.user == comment.user%}
+            <div class="col-md-1 col-1">
+              <a href="{% url 'delete_comment' comment.uid %}">
+                <i class="fa fa-trash"></i>
+              </a>
+            </div>
+            {%endif%}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-center">No comments are made on this post.</p>
+      {% endif %}
+    </div>
+  </section>
+  
+      
+
+{%if request.user.is_authenticated%}
+<section class="section-content padding-y bg">
+    <div class="container">
+        
+        <form method="POST">
+            {% csrf_token %}
+
+        <div class="form-group">
+               <input name="comment" class="form-control" placeholder="Leave a comment" type="text">
+            </div> <!-- form-group// -->
+            
+            
+           
+                <button type="submit" class="btn btn-primary btn-block"> Comment </button>
+            </div> <!-- form-group// -->    
+        </form>
+
+    </div>
 </section>
+{%endif%}
 
 {% block scripts %}
 <script>

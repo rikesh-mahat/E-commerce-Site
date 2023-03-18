@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
-from products.models import Product, Category, ProductImages
+from products.models import Product, Category, ProductImages, Comment
 from accounts.models import Cart
 from accounts.views import assign_cart, load_cart
 from .forms import ProductForm
@@ -32,10 +32,21 @@ def get_product(request, slug):
     productObj  = Product.objects.get(slug=slug)
     productObj.view_count += 1
     productObj.save()
-    context = {
-        'product' : productObj
-    }
     
+    comments = productObj.comments.all()
+    context = {
+        'product' : productObj,
+        'comments' : comments 
+    }
+    if request.method == "POST":
+        user_comment = request.POST.get('comment')
+        user = request.user
+        product = productObj
+        
+        comment =  Comment.objects.create(user = user, text = user_comment, product = product)
+        comment.save()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        
     return render(request, 'products\product.html', context)
 
 
@@ -92,3 +103,9 @@ class ProductUpdateView(UpdateView):
     form_class = ProductForm
     template_name = 'products/edit_product.html'
     success_url = reverse_lazy('my_product')
+    
+    
+def delete_comment(request, uid):
+    comment = Comment.objects.get(uid = uid)
+    comment.delete()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

@@ -17,9 +17,9 @@ urlpatterns = [
     path('edit-admin-order/<uid>/', edit_order_details, name="edit_order_details"),
     path('view-order/<uid>/', view_order, name="view_order"),
     path('search/', search_items, name = "search"),
-    path('esewa-request/', esewa_request, name = 'esewa'),
-    path('esewa-verify/', esewa_verify, name = 'esewa_verify'),
     path('buy_product/<uid>/', buy_item, name="buy"),
     path('users/', display_users, name='display_users'),
-    path('disable/<uid>/', disable_user, name='disable_user')
+    path('disable/<uid>/', disable_user, name='disable_user'),
+    path('accounts/admin-dashboard/allorders/', all_orders, name='all_orders')
+    
 ]

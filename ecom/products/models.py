@@ -35,8 +35,14 @@ class Product(BaseModel):
         
     def __str__(self):
         return self.product_name
-    
+
     
 class ProductImages(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_image")
     image = models.ImageField(upload_to="product")
+    
+    
+class Comment(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
