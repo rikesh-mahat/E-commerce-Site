@@ -14,7 +14,7 @@ class Profile(BaseModel):
     profile_image = models.ImageField(upload_to="profile")
     address = models.CharField(max_length=200, null = True, blank = True)
     mobile = models.PositiveBigIntegerField(null=True, blank=True)
-    status = models.BooleanField(default = False)
+    status = models.BooleanField(default = True)
     
     def get_cart_count(self):
         return CartItems.objects.filter(cart__is_paid = False, cart__user = self.user).count()

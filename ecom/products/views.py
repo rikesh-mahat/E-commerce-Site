@@ -98,11 +98,23 @@ def delete_product(request, uid):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
       
 
-class ProductUpdateView(UpdateView):
-    model = Product
-    form_class = ProductForm
-    template_name = 'products/edit_product.html'
-    success_url = reverse_lazy('my_product')
+
+
+def update_product(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.instance.owner = request.user
+            form.save()
+            return redirect('my_product')
+    else:
+        form = ProductForm(instance=product)
+
+    return render(request, 'products/edit_product.html', {'form': form})
+
+
     
     
 def delete_comment(request, uid):

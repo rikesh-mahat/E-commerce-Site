@@ -1,5 +1,6 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Order
+import random
 from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -8,7 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import login, authenticate, logout
 import uuid
 from django.db.models import Q
-from base.emails import send_account_activation_mail
+from base.emails import send_account_activation_mail, send_forgotpassword_email
 from accounts.models import Profile, Cart, CartItems, Order, ORDER_STATUS, PAYMENT
 from django.http import HttpResponseRedirect
 from products.models import Product
@@ -21,25 +22,7 @@ from django.conf import settings
 # assign cart to a user if he/she logins to the system
 
 
-def assign_cart(request):
-    cart_id = request.session.get('cart.uid', None)
-    if cart_id:
-        cart_obj = Cart.objects.get(uid=cart_id)
-        if request.user.is_authenticated:
-            cart_obj.user = User.objects.get(id=request.user.id)
-            cart_obj.save()
 
-
-def load_cart(request):
-    if request.user.id:
-        user = request.user
-        cartObj = Cart.objects.filter(user=user).order_by('created_at')
-        if cartObj.count():
-            if not cartObj[0].is_checkedout:
-                user_carts = request.user.carts.all()
-                request.session['cart.uid'] = str(user_carts[0].uid)
-                request.session['total_cart_items'] = user_carts[0].get_total_cartitems(
-                )
 
 
 def login_user(request):
@@ -50,8 +33,7 @@ def login_user(request):
         user_obj = User.objects.filter(username=email)
 
         if not user_obj.exists():
-            messages.warning(
-                request, "User does not exist please create an account first")
+            messages.warning(request, "User does not exist please create an account first")
             return HttpResponseRedirect(request.path_info)
 
         if not user_obj[0].profile.is_email_verified:
@@ -62,16 +44,19 @@ def login_user(request):
             messages.warning(request, "Your account has been disabled")
             return HttpResponseRedirect(request.path_info)
 
-        user_obj = authenticate(username=email, password=password)
-        if user_obj:
-            login(request, user_obj)
+        user = authenticate(username=email, password=password)
+        if user:
+            print("authentication successful")
+            login(request, user)
             if "next" in request.GET:
+                print("next is present")
                 next_url = request.GET.get("next")
                 return redirect(next_url)
             else:
-                return redirect('/')
-
-        messages.warning(request, "Sorry the credentials do not match")
+                print("this view working")
+                return redirect('home')
+        messages.warning(request, "Sorry the password doesn't match")
+        
     return render(request, 'accounts/login.html')
 
 
@@ -95,15 +80,14 @@ def register_user(request):
             messages.warning(request, "Password do not match")
             return HttpResponseRedirect(request.path_info)
 
-        registered_user = User.objects.create(
-            first_name=first_name, last_name=last_name, email=email, username=email)
+        registered_user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=email)
         registered_user.set_password(pass2)
         registered_user.save()
 
         email_token = str(uuid.uuid4())
-        register_customer = Profile.objects.create(
-            user=registered_user, address=address, mobile=mobile, email_token=email_token)
+        register_customer = Profile.objects.create(user=registered_user, address=address, mobile=mobile, email_token=email_token)
         register_customer.save()
+        messages.info('An Email has been sent to you email for activation')
         send_account_activation_mail(email, email_token)
 
         if "next" in request.GET:
@@ -114,6 +98,50 @@ def register_user(request):
 
     return render(request, 'accounts/register.html')
 
+def forgot_password(request):
+    if request.method == "POST":
+    # first check if user exist or not then only send verification code
+        username = request.POST.get("email")
+        userObj = User.objects.filter(username = username)
+        print(username)
+        if not userObj.exists():
+            messages.warning(request, "User doesn't exist")
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        auth_code = random.randint(100000, 999999)
+        send_forgotpassword_email(username, auth_code)
+        
+        # store it in the session
+        request.session['code'] = auth_code
+        request.session['username'] = username
+        
+        messages.info(request, "A code has been sent to your email")
+        return redirect('reset_password')
+    return render(request, 'accounts/forgotpassword.html')
+
+def reset_password(request):
+    username = request.session.get('username')
+    code = request.session.get('code')
+    
+    
+    if request.method == "POST":
+        user_code = request.POST.get('code')
+        if int(code) != int(user_code):
+            messages.warning(request, 'Invalid Code')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        pass1 = request.POST.get('pass1')
+        pass2 = request.POST.get('pass2')
+        
+        if pass1 != pass2:
+            messages.info(request, "Password do not match")
+        
+        user = User.objects.get(username = username)
+        user.set_password(pass2)
+        user.save()
+            
+        messages.info(request,"Your password has been changed succesfully")
+        return redirect('login')
+    
+    return render(request, 'accounts/resetpassword.html')
 
 def activate_user(request, email_token):
     try:
@@ -217,13 +245,12 @@ def checkout_cart(request):
         request.session['total_cart_items'] = 0
         payment = request.POST.get('payment')
 
-        if payment == "Esewa":
-            return redirect(reverse('esewa') + '?o_id=' + str(orderObj.uid))
         
         return redirect('home')
     return render(request, 'accounts/checkout.html', context)
 
-
+def khalti_payment(context):
+    pass
 
 def customer_profile(request):
     userObj = request.user

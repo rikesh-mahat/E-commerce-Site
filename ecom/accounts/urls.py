@@ -5,6 +5,8 @@ urlpatterns = [
     path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
     path('register/', register_user, name='register'),
+    path('forgot-password/', forgot_password, name='forgot_password'),
+    path('reset-password/', reset_password, name='reset_password'),
     path('activate/<email_token>/', activate_user, name='activate' ),
     path('cart/', cart, name='cart'),
     path('add-to-cart/<uid>/', add_to_cart, name='add_to_cart'),
@@ -21,5 +23,4 @@ urlpatterns = [
     path('users/', display_users, name='display_users'),
     path('disable/<uid>/', disable_user, name='disable_user'),
     path('accounts/admin-dashboard/allorders/', all_orders, name='all_orders')
-    
 ]
