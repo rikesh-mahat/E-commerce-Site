@@ -15,15 +15,22 @@ from django.http import HttpResponseRedirect
 from products.models import Product
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-import requests as req
 from django.conf import settings
-
+import re
 # Create your views here.
 # assign cart to a user if he/she logins to the system
 
 
 
-
+# def authenticate_password(email, pass1, pass2):
+#     message = ""
+#     status = "False"
+    
+#     if len(pass1) < 8:
+#         message = "Password Ch"
+#     email_name = email.split('@')[0]
+#     contains = re.findall(pass1, email)
+    
 
 def login_user(request):
     if request.method == "POST":
@@ -87,31 +94,34 @@ def register_user(request):
         email_token = str(uuid.uuid4())
         register_customer = Profile.objects.create(user=registered_user, address=address, mobile=mobile, email_token=email_token)
         register_customer.save()
-        messages.info('An Email has been sent to you email for activation')
+        messages.info(request, 'An Email has been sent to you email for activation')
         send_account_activation_mail(email, email_token)
-
+        
         if "next" in request.GET:
             next_url = request.GET.get("next")
             return redirect(next_url)
         else:
-            return HttpResponseRedirect(request.path_info)
-
+            return redirect('login')
+        
+        
     return render(request, 'accounts/register.html')
 
 def forgot_password(request):
     if request.method == "POST":
     # first check if user exist or not then only send verification code
         username = request.POST.get("email")
-        userObj = User.objects.filter(username = username)
-        print(username)
+        userObj = User.objects.filter(email = username)
         if not userObj.exists():
             messages.warning(request, "User doesn't exist")
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         auth_code = random.randint(100000, 999999)
+        profile = Profile.objects.get(user  = userObj[0])
+        profile.email_code = auth_code
+        profile.save()
+        
         send_forgotpassword_email(username, auth_code)
         
         # store it in the session
-        request.session['code'] = auth_code
         request.session['username'] = username
         
         messages.info(request, "A code has been sent to your email")
@@ -120,11 +130,14 @@ def forgot_password(request):
 
 def reset_password(request):
     username = request.session.get('username')
-    code = request.session.get('code')
+    user = User.objects.get(email = username)
+    code = user.profile.email_code
     
-    
+   
     if request.method == "POST":
+        
         user_code = request.POST.get('code')
+        print(code, user_code)
         if int(code) != int(user_code):
             messages.warning(request, 'Invalid Code')
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -170,7 +183,7 @@ def get_or_create_cart(request):
                 cart.save()
         else:
             check_cart = Cart.objects.filter(user=request.user).last()
-            if check_cart is not None and not check_cart.checked_out:
+            if check_cart is not None and not check_cart.is_checkedout:
                 cart = check_cart
             else:
                 cart = Cart.objects.create(user=request.user)
@@ -202,39 +215,39 @@ def cart(request):
     return render(request, 'accounts/cart.html')
 
 
-def add_to_cart(request, uid):
-    cart = get_or_create_cart(request)
-    productObj = Product.objects.get(uid=uid)
-    cart_uid = request.session.get('cart.uid', None)
+# def add_to_cart(request, uid):
+#     cart = get_or_create_cart(request)
+#     productObj = Product.objects.get(uid=uid)
+#     cart_uid = request.session.get('cart.uid', None)
 
-    if cart_uid:
+#     if cart_uid:
 
-        cart = Cart.objects.get(uid=uuid.UUID(cart_uid))
+#         cart = Cart.objects.get(uid=uuid.UUID(cart_uid))
 
-    else:
-        cart = Cart.objects.create(is_checkedout=False)
-        request.session['cart.uid'] = str(cart.uid)
+#     else:
+#         cart = Cart.objects.create(is_checkedout=False)
+#         request.session['cart.uid'] = str(cart.uid)
 
-    cart_item_obj = CartItems.objects.filter(cart=cart, product=productObj)
-    if cart_item_obj.exists():
-        return redirect('cart')
-    cart_item = CartItems.objects.create(cart=cart, product=productObj)
-    cart_item.save()
-    request.session['total_cart_items'] = cart.get_total_cartitems()
+#     cart_item_obj = CartItems.objects.filter(cart=cart, product=productObj)
+#     if cart_item_obj.exists():
+#         return redirect('cart')
+#     cart_item = CartItems.objects.create(cart=cart, product=productObj)
+#     cart_item.save()
+#     request.session['total_cart_items'] = cart.get_total_cartitems()
 
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+#     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-def remove_cart(request, cart_item_uid):
-    try:
-        cart = get_or_create_cart(request)
-        cart_item = CartItems.objects.get(uid=cart_item_uid)
-        cart_item.delete()
-        cartObj = Cart.objects.get(uid=cart_item.cart.uid)
-        request.session['total_cart_items'] = cartObj.get_total_cartitems()
-    except Exception as e:
-        print(e)
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+# def remove_cart(request, cart_item_uid):
+#     try:
+#         cart = get_or_create_cart(request)
+#         cart_item = CartItems.objects.get(uid=cart_item_uid)
+#         cart_item.delete()
+#         cartObj = Cart.objects.get(uid=cart_item.cart.uid)
+#         request.session['total_cart_items'] = cartObj.get_total_cartitems()
+#     except Exception as e:
+#         print(e)
+#     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required()

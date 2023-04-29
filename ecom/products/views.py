@@ -2,41 +2,47 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from products.models import Product, Category, ProductImages, Comment
 from accounts.models import Cart
-from accounts.views import assign_cart, load_cart
 from .forms import ProductForm
+from django.core.paginator import Paginator
 from django.views.generic.edit import UpdateView
 from django.urls import reverse_lazy
 from .forms import ProductForm
 # Create your views here.
 
-def del_buy_cart(request):
-    if request.META.get('HTTP_REFERER'):
-        if "buy_product" in request.META.get('HTTP_REFERER'):
-            carts = Cart.objects.filter(user = request.user).order_by('-created_at')
-            carts[0].delete()
+
     
 def home(request):
-    assign_cart(request)
-    load_cart(request)
-    products = Product.objects.all()
-    context = {
-        'products' : products
-    }
+    products = Product.objects.all().order_by('-created_at')
+    paginator = Paginator(products, 4)
+    page_number = request.GET.get('page', 1)
+    productsData = paginator.get_page(page_number)
     
-    del_buy_cart(request)
-    return render(request, 'products\home.html', context)
+   
+    return render(request, 'products\home.html', {'products': productsData})
 
 def get_product(request, slug):
-    assign_cart(request)
-    load_cart(request)
+   
     productObj  = Product.objects.get(slug=slug)
     productObj.view_count += 1
     productObj.save()
     
+    
+    other_products = Product.objects.all()
+    paginator = Paginator(other_products, 5)
+    page_number = request.GET.get('p')
+    other_products_data = paginator.get_page(page_number)
+    
     comments = productObj.comments.all()
+    paginator = Paginator(comments, 4)
+    page_number = request.GET.get('page')
+    commentsData = paginator.get_page(page_number)
+    
+    
     context = {
         'product' : productObj,
-        'comments' : comments 
+        'comments' : commentsData,
+        'products': other_products_data,
+        'slug' : slug
     }
     if request.method == "POST":
         user_comment = request.POST.get('comment')
@@ -52,13 +58,12 @@ def get_product(request, slug):
 
 
 def get_all_products(request):
-    assign_cart(request)
-    load_cart(request)
+    
     allcategoryObj = Category.objects.all()
     context = {
         'allcategory' : allcategoryObj,
     }
-    del_buy_cart(request)
+    
     
         
     return render(request, 'products/allproducts.html', context)

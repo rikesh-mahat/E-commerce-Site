@@ -140,7 +140,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'akarikesh@gmail.com'
-EMAIL_HOST_PASSWORD = 'wqbjuaxdejqtoxen'
+EMAIL_HOST_PASSWORD = 'eaaluayyhjsiytis'
 
 KHALTI_TEST_PUBLIC_KEY = 'test_public_key_b0e3cbc8b2a745b1b7a2bfb78c4b778b'
 KHALTI_TEST_SECRET_KEY = 'test_secret_key_b799d0896a034ec8beb7d4fc9f5e2e75'

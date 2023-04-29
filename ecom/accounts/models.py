@@ -11,6 +11,7 @@ class Profile(BaseModel):
     user  = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     is_email_verified = models.BooleanField(default=False)
     email_token = models.CharField(max_length=200, null = True, blank = True)
+    email_code = models.PositiveBigIntegerField(default=0)
     profile_image = models.ImageField(upload_to="profile")
     address = models.CharField(max_length=200, null = True, blank = True)
     mobile = models.PositiveBigIntegerField(null=True, blank=True)
@@ -52,7 +53,22 @@ class CartItems(BaseModel):
     
     def __str__(self):
         return self.product.product_name
-   
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.user.username
+    
+class WishlistItems(models.Model):
+    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='wishlist_items')
+    item = models.ForeignKey(Product, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.wishlist.user.username 
+    
+    
 ORDER_STATUS = (
     ("Order Received","Order Received"),
     ("Order Processing","Order Processing"),
