@@ -1,0 +1,97 @@
+<!--Main Navigation-->
+<head><link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.15.3/css/all.css" integrity="..." crossorigin="anonymous"></head>
+<header class="sticky-top">
+    <!-- Jumbotron -->
+    <div class="p-3 text-center bg-white border-bottom">
+      <div class="container">
+        <div class="row gy-3">
+          <!-- Left elements -->
+          <div class="col-lg-2 col-sm-4 col-4">
+            <a href="https://mdbootstrap.com/" target="_blank" class="float-start">
+              <img src="" alt="My Logo" height="35" />
+            </a>
+          </div>
+          <!-- Left elements -->
+  
+          <!-- Center elements -->
+          <div class="order-lg-last col-lg-5 col-sm-8 col-8">
+            <div class="d-flex float-end">
+              {%if request.user.is_authenticated%}
+              <a href="{%url 'wishlist'%}" class="me-1 border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-heart m-1 me-md-2"></i><p class="d-none d-md-block mb-0">Wishlist</p> </a>
+              {%endif%}&nbsp;
+              <a href="{%url 'cart'%}" class="border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-shopping-cart m-1 me-md-2"></i><p class="d-none d-md-block mb-0">My cart</p> </a>
+              {%if request.user.is_authenticated%}
+              &nbsp;
+              <a href="{%url 'profile'%}" class="me-1 border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-user-alt m-1 me-md-2"></i><p class="d-none d-md-block mb-0">Profile</p> </a>
+              <a href="{%url 'logout'%}" class="me-1 border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-sign-out-alt m-1 me-md-2"></i><p class="d-none d-md-block mb-0">Logout</p> </a>
+              {%else%}
+              &nbsp;
+              <a href="{%url 'login'%}" class="me-1 border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-sign-in-alt m-1 me-md-2"></i><p class="d-none d-md-block mb-0">Sign In</p> </a>
+              {%endif%}
+              
+            </div>
+          </div>
+          <!-- Center elements -->
+          
+          
+          <!-- Right elements -->
+          <div class="col-lg-5 col-md-12 col-12">
+            <form  class = "search" method="GET" action="{% url 'search'%}">
+            <div class="input-group float-center">
+              
+              <div class="form-outline">
+                <input type="search" id="form1" class="form-control" name ="keyword" required/>
+                <label class="form-label" for="form1">Search</label>
+              </div>
+              <button type="submit" class="btn btn-primary shadow-0">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </form>
+          </div>
+        
+          <!-- Right elements -->
+        </div>
+      </div>
+    </div>
+    <!-- Jumbotron -->
+  
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+      <!-- Container wrapper -->
+      <div class="container justify-content-center justify-content-md-between">
+        <!-- Toggle button -->
+        <button
+                class="navbar-toggler border py-2 text-dark"
+                type="button"
+                data-mdb-toggle="collapse"
+                data-mdb-target="#navbarLeftAlignExample"
+                aria-controls="navbarLeftAlignExample"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+                >
+          <i class="fas fa-bars"></i>
+        </button>
+  
+        <!-- Collapsible wrapper -->
+        <div class="collapse navbar-collapse" id="navbarLeftAlignExample">
+          <!-- Left links -->
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link text-dark" aria-current="page" href="{%url 'home'%}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark" href="{%url 'category'%}">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark" href="{%url 'thrift'%}">Thrift</a>
+            </li>
+            
+          </ul>
+          <!-- Left links -->
+        </div>
+      </div>
+      <!-- Container wrapper -->
+    </nav>
+    <!-- Navbar -->
+  </header>

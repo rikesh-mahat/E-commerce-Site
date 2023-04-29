@@ -158,20 +158,42 @@ def logout_user(request):
     return redirect(reverse('home'))
 
 
+
+def get_or_create_cart(request):
+    cartid = request.session.get('cart.uid')
+
+    if request.user.is_authenticated:
+        if cartid:
+            cart = Cart.objects.get(id=cartid)
+            if cart.user is None:
+                cart.user = request.user
+                cart.save()
+        else:
+            check_cart = Cart.objects.filter(user=request.user).last()
+            if check_cart is not None and not check_cart.checked_out:
+                cart = check_cart
+            else:
+                cart = Cart.objects.create(user=request.user)
+            request.session['cartid'] = cart.id
+    else:
+        if cartid:
+            cart = Cart.objects.get(id=cartid)
+        else:
+            cart = Cart.objects.create()
+            request.session['cart.uid'] = cart.uid
+
+    return cart
+
 def cart(request):
-    assign_cart(request)
-    load_cart(request)
+    cart = get_or_create_cart(request)
 
-    cart_uid = request.session.get('cart.uid', None)
-
-    if cart_uid:
-        cartObj = Cart.objects.get(uid=uuid.UUID(cart_uid))
-
+    if cart.uid:
+        
         context = {
-            'cart': cartObj,
-            'cart_items': cartObj.cart_items.all()
+            'cart': cart,
+            'cart_items': cart.cart_items.all()
         }
-        if not cartObj.cart_items.all().count():
+        if not cart.cart_items.all().count():
             messages.info(
                 request, 'No items in cart. Please continue shopping')
         return render(request, 'accounts/cart.html', context)
@@ -181,8 +203,7 @@ def cart(request):
 
 
 def add_to_cart(request, uid):
-    assign_cart(request)
-    load_cart(request)
+    cart = get_or_create_cart(request)
     productObj = Product.objects.get(uid=uid)
     cart_uid = request.session.get('cart.uid', None)
 
@@ -206,8 +227,7 @@ def add_to_cart(request, uid):
 
 def remove_cart(request, cart_item_uid):
     try:
-        assign_cart(request)
-        load_cart(request)
+        cart = get_or_create_cart(request)
         cart_item = CartItems.objects.get(uid=cart_item_uid)
         cart_item.delete()
         cartObj = Cart.objects.get(uid=cart_item.cart.uid)
@@ -219,23 +239,21 @@ def remove_cart(request, cart_item_uid):
 
 @login_required()
 def checkout_cart(request):
-    assign_cart(request)
-    load_cart(request)
-    cart_uid = request.session.get('cart.uid')
-    cartObj= Cart.objects.get(uid = cart_uid)
+    cart = get_or_create_cart(request)
+    
     context ={
-        'items' : cartObj.cart_items.all(),
-        'cart': cartObj,
+        'items' : cart.cart_items.all(),
+        'cart': cart,
         'payments' : PAYMENT,
     }
 
     if request.method == "POST":
-        cart = cartObj
+        cart = cart
         ordered_by = request.POST.get("username")
         email = request.POST.get("email")
         mobile  = request.POST.get("mobile")
         shipping_address = request.POST.get("address")
-        total = cartObj.get_cart_total()
+        total =cart.get_cart_total()
 
         orderObj = Order.objects.create(cart = cart, ordered_by = ordered_by, shipping_address = shipping_address, mobile = mobile, email = email, total = total)
         orderObj.save()
@@ -262,111 +280,96 @@ def customer_profile(request):
     }
 
     if request.method == "POST":
-        first_name = request.POST.get('fname')
-        last_name = request.POST.get('lname')
-        email = request.POST.get('email')
-        mobile = request.POST.get('mobile')
-        address = request.POST.get('address')
-
-        user.email = email
-        user.first_name = first_name
-        user.last_name = last_name
-        user.username = email
-        user.save()
-
-        profile = Profile.objects.get(user=user)
-        profile.address = address
-        profile.mobile = mobile
-        profile.save()
+        pass
 
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
     return render(request, 'accounts/profile.html', context)
 
 
-def admin_login(request):
-    if request.method == "POST":
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+# def admin_login(request):
+#     if request.method == "POST":
+#         email = request.POST.get('email')
+#         password = request.POST.get('password')
 
-        user_obj = User.objects.filter(username=email)
+#         user_obj = User.objects.filter(username=email)
 
-        if not user_obj.exists():
-            messages.warning(request, "No such admin account exists")
-            return HttpResponseRedirect(request.path_info)
+#         if not user_obj.exists():
+#             messages.warning(request, "No such admin account exists")
+#             return HttpResponseRedirect(request.path_info)
 
-        user_obj = authenticate(username=email, password=password)
+#         user_obj = authenticate(username=email, password=password)
 
-        if user_obj:
-            login(request, user_obj)
-            return redirect('admin_dashboard')
+#         if user_obj:
+#             login(request, user_obj)
+#             return redirect('admin_dashboard')
 
-        messages.warning(request, "Sorry the credentials do not match")
-        return HttpResponseRedirect(request.path_info)
+#         messages.warning(request, "Sorry the credentials do not match")
+#         return HttpResponseRedirect(request.path_info)
 
-    return render(request, 'adminpages/admin_login.html')
-
-
-def admin_dashboard(request):
-    if not request.user.is_authenticated:
-        return redirect('admin_login')
-    pending_orders = Order.objects.filter(order_status="Order Received").order_by("-created_at")
-    context = {
-        'pending_orders': pending_orders
-    }
-    return render(request, 'adminpages/admin_dashboard.html', context)
+#     return render(request, 'adminpages/admin_login.html')
 
 
-def all_orders(request):
-    if not request.user.is_authenticated:
-        return redirect('admin_login')
-    all_orders = Order.objects.all().order_by("-created_at")
-    context = {
-        'all_orders': all_orders
-    }
-    return render(request, 'adminpages/allorders.html', context)
-
-def order_details(request, uid):
-    if not request.user.is_authenticated:
-        return redirect('admin_login')
-    orderObj = Order.objects.get(uid=uid)
-    orderItems = orderObj.cart.cart_items.all()
-    context = {
-        'order': orderObj,
-        'orderitems': orderItems,
-    }
-    return render(request, 'adminpages/orderdetail.html', context)
+# def admin_dashboard(request):
+#     if not request.user.is_authenticated:
+#         return redirect('admin_login')
+#     pending_orders = Order.objects.filter(order_status="Order Received").order_by("-created_at")
+#     context = {
+#         'pending_orders': pending_orders
+#     }
+#     return render(request, 'adminpages/admin_dashboard.html', context)
 
 
-def edit_order_details(request, uid):
-    if not request.user.is_authenticated:
-        return redirect('admin_login')
-    orderObj = Order.objects.get(uid=uid)
-    allstatus = ORDER_STATUS
+# def all_orders(request):
+#     if not request.user.is_authenticated:
+#         return redirect('admin_login')
+#     all_orders = Order.objects.all().order_by("-created_at")
+#     context = {
+#         'all_orders': all_orders
+#     }
+#     return render(request, 'adminpages/allorders.html', context)
 
-    context = {
-        'order': orderObj,
-        'allstatus': allstatus,
-    }
-
-    if request.method == "POST":
-        status = request.POST.get('status')
-        orderObj.order_status = status
-        orderObj.save()
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-    return render(request, 'adminpages/editorderdetail.html', context)
+# def order_details(request, uid):
+#     if not request.user.is_authenticated:
+#         return redirect('admin_login')
+#     orderObj = Order.objects.get(uid=uid)
+#     orderItems = orderObj.cart.cart_items.all()
+#     context = {
+#         'order': orderObj,
+#         'orderitems': orderItems,
+#     }
+#     return render(request, 'adminpages/orderdetail.html', context)
 
 
-def view_order(request, uid):
-    orderObj = Order.objects.get(uid=uid)
-    order_items = CartItems.objects.filter(cart=orderObj.cart)
-    context = {
-        'items': order_items,
-        'order': orderObj,
-    }
+# def edit_order_details(request, uid):
+#     if not request.user.is_authenticated:
+#         return redirect('admin_login')
+#     orderObj = Order.objects.get(uid=uid)
+#     allstatus = ORDER_STATUS
 
-    return render(request, 'accounts/view_order.html', context)
+#     context = {
+#         'order': orderObj,
+#         'allstatus': allstatus,
+#     }
+
+#     if request.method == "POST":
+#         status = request.POST.get('status')
+#         orderObj.order_status = status
+#         orderObj.save()
+#         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+#     return render(request, 'adminpages/editorderdetail.html', context)
+
+
+# def view_order(request, uid):
+#     orderObj = Order.objects.get(uid=uid)
+#     order_items = CartItems.objects.filter(cart=orderObj.cart)
+#     context = {
+#         'items': order_items,
+#         'order': orderObj,
+#     }
+
+#     return render(request, 'accounts/view_order.html', context)
 
 
     
@@ -415,32 +418,31 @@ def buy_item(request, uid):
 
         payment = request.POST.get('payment')
 
-        if payment == "Esewa":
-            return redirect(reverse('esewa') + '?o_id=' + str(orderObj.uid))
+        
 
     return render(request, 'accounts/checkout.html', context)
 
 
-def display_users(request):
-    profile_list = Profile.objects.all()
-    paginator = Paginator(profile_list, 1)  # Show 10 profiles per page
-    page_number = request.GET.get('page')
-    try:
-        profiles = paginator.page(page_number)
-    except PageNotAnInteger:
-        # If page_number is not an integer, use the first page
-        profiles = paginator.page(1)
-    except EmptyPage:
-        # If page_number is out of range (e.g. 9999), use the last page
-        profiles = paginator.page(paginator.num_pages)
-    return render(request, 'adminpages/users.html', {'profiles': profiles})
+# def display_users(request):
+#     profile_list = Profile.objects.all()
+#     paginator = Paginator(profile_list, 1)  # Show 10 profiles per page
+#     page_number = request.GET.get('page')
+#     try:
+#         profiles = paginator.page(page_number)
+#     except PageNotAnInteger:
+#         # If page_number is not an integer, use the first page
+#         profiles = paginator.page(1)
+#     except EmptyPage:
+#         # If page_number is out of range (e.g. 9999), use the last page
+#         profiles = paginator.page(paginator.num_pages)
+#     return render(request, 'adminpages/users.html', {'profiles': profiles})
 
 
-def disable_user(request, uid):
-    user = Profile.objects.get(uid=uid)
-    if user.status:
-        user.status = False
-    else:
-        user.status = True
-    user.save()
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+# def disable_user(request, uid):
+#     user = Profile.objects.get(uid=uid)
+#     if user.status:
+#         user.status = False
+#     else:
+#         user.status = True
+#     user.save()
+#     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
