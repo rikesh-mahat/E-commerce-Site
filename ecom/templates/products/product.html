@@ -1,7 +1,16 @@
+
+
 {% extends 'base/base.html' %}
 
+<style>
+  .btn .btn-outline-dark:hover{
+    background-color:black !important;
+  }
+</style>
 
 {% block start %}
+
+
 
 <section class="p-1" style="padding:0;">
   <div class="container px-4 px-lg-9 my-5">
@@ -19,7 +28,7 @@
         <div class="d-flex align-items-evenly">
           
             <div class="d-flex align-items-center">
-              <a class="btn btn-primary" href="">Buy Product</a>
+              <a class="btn btn-primary" href="{%url 'checkout_cart' product.uid%}">Buy Product</a>
               &nbsp;&nbsp;
               <a class="btn btn-outline-dark" href="">Add to Wishlist</a>              
              
@@ -60,7 +69,7 @@
           </div>
           <!-- Product actions-->
           <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-            <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'get_product' product.slug%}">View options</a></div>
+            <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'get_product' product.slug%}">View Item</a></div>
           </div>
         </div>
         

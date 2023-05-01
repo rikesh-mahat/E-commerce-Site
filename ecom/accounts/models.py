@@ -16,6 +16,7 @@ class Profile(BaseModel):
     address = models.CharField(max_length=200, null = True, blank = True)
     mobile = models.PositiveBigIntegerField(null=True, blank=True)
     status = models.BooleanField(default = True)
+    email = models.EmailField(blank=True, null=True)
     
     def get_cart_count(self):
         return CartItems.objects.filter(cart__is_paid = False, cart__user = self.user).count()
@@ -80,7 +81,6 @@ ORDER_STATUS = (
 PAYMENT = (
     ("Cash On Delivery", "Cash On Delivery"),
     ("Khalti", "Khalti"),
-    ("Esewa", "Esewa"),
 )  
 class Order(BaseModel):
     cart = models.OneToOneField(Cart, on_delete=models.CASCADE, null=True, blank=True,related_name='orders')

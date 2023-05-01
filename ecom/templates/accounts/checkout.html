@@ -1,118 +1,119 @@
-{%extends 'base\base.html'%}
-{% block start%}
+{%extends 'base/base.html'%} {%load static%} {%block start%}
 
-<div class="container" style="margin-top:2rem">
-    <hr>
-    <div class="row">
-        <div class="col-md-6">
-            <h3>Items in Cart</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>S.N.</th>
-                        <th>Product</th>
-                        <th>Price</th>
-                        
-                    </tr>
-                </thead>
-                <tbody>
-                    {%for item in items%}
-                    <tr>
-                        <td>{{forloop.counter}}</td>
-                        <td>{{item.product.product_name}}</td>
-                        <td>Rs {{item.product.price}}</td>
-                    </tr>
-                    {%endfor%}
-                </tbody>
-            </table>
-            <hr>
-            <p class="text-right"><b>Total : Rs {{cart.get_cart_total}}</b></p>
-            </div>   
-    </div>
-<hr>
-    <div class="row">
-    <div class="col-md-6">
-        <h3>Checkout Form</h3>
-        
-        <hr>
-            <form>
-                 
-                  {% include "base/alert.html" %}   <!-- for messages-->
-              <div class="form-group">
-                    <label> <h5>Ordered by</h5></label>
-                     <input name="username" value = "{{request.user.first_name | title}}  {{request.user.last_name | title}}"class="form-control" placeholder="Ordered by" type="text" required>
-                    </div> <!-- form-group// -->
+<section class="bg-light py-5 my-2">
+  <div class="container">
+    <div class="row gutter-sm">
+      <div
+        class="col-xl-4 col-lg-5 mb-5 d-flex justify-content-center justify-content-lg "
+      >
+        <div class="border p-5" style="width: 80%">
+          <div class="card-body">
+            <h6 class="card-title mb-3">Summary</h6>
 
-                    <div class="form-group">
-                        <label> <h5>Email </h5></label>
-                        <input name="email" value = "{{request.user.email}}" class="form-control" placeholder="Mobile Number" type="text" required>
-                      </div> <!-- form-group// -->
+            <hr />
 
-                  <div class="form-group">
-                    <label> <h5>Mobile Number</h5></label>
-                    <input name="mobile" value = "{{request.user.profile.mobile}}" class="form-control" placeholder="Mobile Number" type="text" required>
-                  </div> <!-- form-group// -->
+            <div class="d-flex justify-content-between mb-4">
+              <p class="mb-0">Total price:</p>
+              <p class="mb-0 fw-bold">Rs {{item.price}}</p>
+            </div>
 
-                  <div class="form-group">
-                    <label> <h5>Shipping Address</h5></label>
-                    <input name="address" value = "{{request.user.profile.address}}" class="form-control" placeholder="Shipping Address" type="text" required>
-                  </div> <!-- form-group// -->
+            <hr />
 
-                  <div class="form-group">
-                  <select name="payment" class="dropdown">
-                    {%for i, j in payments %}
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <option class="dropdown-item" value = "{{i}}" {%if i == order.order_status%}selected{%endif%}>{{j}}</option>
-                    </div>
-    
-                    {%endfor%}
-                   </select>
-                </div> <!-- form-group// -->
-
-                  <div class="form-group">
-                    <button id="payment-button">Pay with Khalti</button>
-                  </div> <!-- form-group// -->    
-              </form> 
-             
-
-              
+            <h6 class="card-subtitle text-dark my-4">Item buying</h6>
+            <hr />
+            <div class="d-flex align-items-center mb-4">
+              <div class="me-3 position-relative">
+               
+                <img
+                  src="{{item.product_image.first.image.url}}"
+                  class="img-fluid rounded border"
+                  style="height: 96px; width: 96px"
+                  alt="{{item.product_name}} image"
+                />
+              </div>
+              <div class="">
+                <a href="#" class="card-link text-dark">
+                  {{item.product_name}} <br />
+                  {{item.category}}
+                </a>
+                <div class="card-text text-muted mb-2">
+                  Price: {{item.price}}
+                </div>
+              </div>
+            </div>
+            <hr />
+          </div>
         </div>
+      </div>
+
+      <div class="col-xl-8 col-lg-8 mb-4 py-5 border rounded">
+        <h3 class="card-title mb-4">Checkout</h3>
+        <!-- Checkout -->
+        <form method="POST">
+            {%csrf_token%}
+          <!-- 2 column grid layout with text inputs for the first and last names -->
+          <div class="row mb-4">
+            <div class="col">
+              <div class="form-outline">
+                <input type="text" id="form6Example1" class="form-control" name="firstname" value="{{request.user.firstname}}" required/>
+                <label class="form-label" for="form6Example1">First name</label>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-outline">
+                <input type="text" id="form6Example2" class="form-control" name="lastname" value="{{request.user.lastname}}" required/>
+                <label class="form-label" for="form6Example2">Last name</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col">
+              <div class="form-outline">
+                <input type="email" id="form6Example5" class="form-control" name="email" required/>
+                <label class="form-label" for="form6Example5">Email</label>
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="form-outline">
+                <input type="number" id="form6Example6" class="form-control" name="mobile" required/>
+                <label class="form-label" for="form6Example6">Phone</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Text input -->
+          <div class="form-outline mb-4">
+            <input type="text" id="form6Example4" class="form-control" name="address"  required/>
+            <label class="form-label" for="form6Example4">Address</label>
+          </div>
+
+          <hr/>
+          <div class="row border-bottom">
+            <div class="col-sm-4 mb-3">
+              <p class="mb-2"><strong>Choose a Payment Options</strong></p>
+              <select class="form-select" name="payment">
+                <option value="Cashondelivery">Cash on Delivery</option>
+                <option value="Khalti">Khalti</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Submit button -->
+          <div class="float-end mt-3">
+            <a
+              href=""
+              class="btn btn-light border text-danger icon-hover-danger"
+              >Cancel</a
+            >
+            <button class="btn btn-success shadow-0 border" type="submit">
+              Continue
+            </button>
+          </div>
+        </form>
     </div>
-</div>
-<script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
-              <script>
-                var config = {
-                    // replace the publicKey with yours
-                    "publicKey": "test_public_key_b0e3cbc8b2a745b1b7a2bfb78c4b778b",
-                    "productIdentity": "1234567890",
-                    "productName": "Dragon",
-                    "productUrl": "http://gameofthrones.wikia.com/wiki/Dragons",
-                    "paymentPreference": [
-                        "KHALTI",
-                        "EBANKING",
-                        "MOBILE_BANKING",
-                        "CONNECT_IPS",
-                        "SCT",
-                        ],
-                    "eventHandler": {
-                        onSuccess (payload) {
-                            // hit merchant api for initiating verfication
-                            console.log(payload);
-                        },
-                        onError (error) {
-                            console.log(error);
-                        },
-                        onClose () {
-                            console.log('widget is closing');
-                        }
-                    }
-                };
-        
-                var checkout = new KhaltiCheckout(config);
-                var btn = document.getElementById("payment-button");
-                btn.onclick = function () {
-                    // minimum transaction amount must be 10, i.e 1000 in paisa.
-                    checkout.show({amount: 1000});
-                }
-            </script>
-{% endblock%}
+  </div>
+</section>
+
+{%endblock%}

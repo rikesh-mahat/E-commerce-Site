@@ -9,10 +9,10 @@ urlpatterns = [
     path('reset-password/', reset_password, name='reset_password'),
     path('activate/<email_token>/', activate_user, name='activate' ),
     path('cart/', cart, name='cart'),
-    path('checkout-cart/', checkout_cart, name='checkout-cart'),
+    path('checkout-cart/<uid>/', checkout_cart, name='checkout_cart'),
     path('profile/', customer_profile, name='customer_profile'),
     path('search/', search_items, name = "search"),
-    path('buy_product/<uid>/', buy_item, name="buy"),
+    # path('buy_product/<uid>/', buy_item, name="buy"),
     
      # path('add-to-cart/<uid>/', add_to_cart, name='add_to_cart'),
      # path('remove-cart/<cart_item_uid>/', remove_cart, name='remove_cart'),

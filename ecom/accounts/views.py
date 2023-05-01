@@ -187,7 +187,7 @@ def get_or_create_cart(request):
                 cart = check_cart
             else:
                 cart = Cart.objects.create(user=request.user)
-            request.session['cartid'] = cart.id
+            request.session['cartid'] = str(cart.uid)
     else:
         if cartid:
             cart = Cart.objects.get(id=cartid)
@@ -250,38 +250,46 @@ def cart(request):
 #     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required()
-def checkout_cart(request):
-    cart = get_or_create_cart(request)
+
+def checkout_cart(request, uid):
+    user  = request.user
+    product = Product.objects.get(uid = uid)
     
-    context ={
-        'items' : cart.cart_items.all(),
-        'cart': cart,
-        'payments' : PAYMENT,
-    }
-
-    if request.method == "POST":
-        cart = cart
-        ordered_by = request.POST.get("username")
-        email = request.POST.get("email")
-        mobile  = request.POST.get("mobile")
-        shipping_address = request.POST.get("address")
-        total =cart.get_cart_total()
-
-        orderObj = Order.objects.create(cart = cart, ordered_by = ordered_by, shipping_address = shipping_address, mobile = mobile, email = email, total = total)
-        orderObj.save()
-        cart.is_checkedout = True
-        cart.save()
-        del request.session['cart.uid']
-        request.session['total_cart_items'] = 0
-        payment = request.POST.get('payment')
-
+    if user.is_authenticated:
+        cart = get_or_create_cart(request)
+        if cart.get_total_cartitems() > 0:
+           item = cart.cart_items.all()[0]
+           item.delete()
+        item = CartItems.objects.create(cart = cart, product = product)
+                
         
-        return redirect('home')
-    return render(request, 'accounts/checkout.html', context)
+        if request.method == "POST":
+            orderer = request.POST.get('firstname') + " " + request.POST.get('lastname')
+            shipping_address = request.POST.get('address')
+            email = request.POST.get('email')
+            mobile = request.POST.get('mobile')
+            payment = request.POST.get('payment')
+            
+           
+            order = Order.objects.create(ordered_by = orderer, cart = cart, shipping_address = shipping_address, email = email, mobile = mobile, total =  product.price)
+            if payment == 'Cashondelivery':
+                order.payment = PAYMENT[0][0]
+                order.save()
+                
+                cart.is_checkedout = True
+                cart.save()
+                
+                product.is_sold = True
+                
+                cartid = request.session.get('cart.uid')
+                if not cartid:
+                   del request.session['cart.uid']
+                return redirect('home')
+                
+    
+    return render(request, 'accounts/checkout.html', {'item':product})
 
-def khalti_payment(context):
-    pass
+
 
 def customer_profile(request):
     userObj = request.user
@@ -398,42 +406,42 @@ def search_items(request):
     return render(request, 'products/search.html', context)
 
 
-@login_required()
-def buy_item(request, uid):
+# @login_required()
+# def buy_item(request, uid):
 
-    productObj = Product.objects.get(uid=uid)
-    user = request.user
+#     productObj = Product.objects.get(uid=uid)
+#     user = request.user
 
-    # cart create gardiney ani sidhai checkout ma haldiney tyo cart lai done
+#     # cart create gardiney ani sidhai checkout ma haldiney tyo cart lai done
 
-    cart = Cart.objects.create(user=user, is_checkedout=True)
+#     cart = Cart.objects.create(user=user, is_checkedout=True)
 
-    # item in cart
-    CartItems.objects.create(cart=cart, product=productObj)
+#     # item in cart
+#     CartItems.objects.create(cart=cart, product=productObj)
 
-    # context pass gardiney checkout form lai
-    context = {
-        'items': cart.cart_items.all(),
-        'cart': cart,
-        'payments': PAYMENT,
-    }
-    if request.method == "POST":
-        cart = cart
-        ordered_by = request.POST.get("username")
-        email = request.POST.get("email")
-        mobile = request.POST.get("mobile")
-        shipping_address = request.POST.get("address")
-        total = cart.get_cart_total()
+#     # context pass gardiney checkout form lai
+#     context = {
+#         'items': cart.cart_items.all(),
+#         'cart': cart,
+#         'payments': PAYMENT,
+#     }
+#     if request.method == "POST":
+#         cart = cart
+#         ordered_by = request.POST.get("username")
+#         email = request.POST.get("email")
+#         mobile = request.POST.get("mobile")
+#         shipping_address = request.POST.get("address")
+#         total = cart.get_cart_total()
 
-        orderObj = Order.objects.create(
-            cart=cart, ordered_by=ordered_by, shipping_address=shipping_address, mobile=mobile, email=email, total=total)
-        orderObj.save()
+#         orderObj = Order.objects.create(
+#             cart=cart, ordered_by=ordered_by, shipping_address=shipping_address, mobile=mobile, email=email, total=total)
+#         orderObj.save()
 
-        payment = request.POST.get('payment')
+#         payment = request.POST.get('payment')
 
         
 
-    return render(request, 'accounts/checkout.html', context)
+#     return render(request, 'accounts/checkout.html', context)
 
 
 # def display_users(request):

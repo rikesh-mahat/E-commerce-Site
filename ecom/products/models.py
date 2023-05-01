@@ -26,6 +26,7 @@ class Product(BaseModel):
     price = models.FloatField()
     product_description = models.TextField()
     view_count = models.PositiveIntegerField(default=0)
+    is_sold = models.BooleanField(default=False)
     
     
     
