@@ -1,0 +1,211 @@
+{%extends 'base/base.html' %}
+
+
+{%block start%}
+<style>
+    .popup__parent {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .popup {
+        background-color: white;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .popup__check-sign {
+        width: 5rem;
+        height: 5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .popup__text {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    
+    .popup__button {
+        padding: 0.5rem 2rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+    }
+    
+    .popup__button:hover {
+        background-color: #0069d9;
+    }
+    
+</style>
+<section class="h-100 h-custom" style="background-color: #eee;">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-lg-8 col-xl-6">
+          <div class="card border-top border-bottom border-3" style="border-color: #602c8c !important;">
+            <div class="card-body p-5">
+  
+              <h2  style="color: #602c8c;">Pay Using Khalti</h2>
+                <br>
+              <div class="row justify-content-space-around" style="width:100%">
+                <div class="col mb-3">
+                  <p class="small text-muted mb-1">Date</p>
+                  <p>{{order.created_at | date}}</p>
+                </div>
+                <div class="col-6 mb-3">
+                  <p class="small text-muted mb-1">Order No.</p>
+                  <p>{{order.uid}}</p>
+                </div>
+              </div>
+           
+              <div class="mx-n5 px-5 py-4" style="background-color: #f2f2f2;">
+
+                <div class="row">
+                    <div class="col-md-8 col-lg-9">
+                      <p><strong>Item</strong></p>
+                    </div>
+                    <div class="col-md-4 col-lg-3">
+                      <p><strong>Price</strong></p>
+                    </div>
+                  </div>
+                
+                {%for item in items%}
+                <div class="row">
+                    
+                    
+                
+                  <div class="col-md-8 col-lg-9">
+                    
+                    <p>{{item.product.product_name}}</p>
+                  </div>
+                  <div class="col-md-4 col-lg-3">
+                    <p>Rs {{item.product.price}}</p>
+                  </div>
+                </div>
+                {%endfor%}
+              </div>
+  
+              <hr>
+              <div class="row my-4">
+                <div class="col-md-4 offset-md-8 col-lg-3 offset-lg-9">
+                  <p class="lead fw-bold mb-0" style="color: #602c8c;"> Rs {{order.total}}</p>
+                </div>
+              </div>
+  
+        
+              <div class="row justify-content-center">
+                <div class="col-6 text-center">
+                  <button class="btn btn-lg text-white" type="button" id="payment-button" style="background-color: #602c8c;">Pay with Khalti</button>
+                </div>
+              </div>
+              
+  
+              
+  
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+<script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+<script>
+
+      var config = {
+              // replace the publicKey with yours
+              "publicKey": "test_public_key_b0e3cbc8b2a745b1b7a2bfb78c4b778b",
+              "productIdentity": "1234567890",
+              "productName": "Dragon",
+              "productUrl": "http://gameofthrones.wikia.com/wiki/Dragons",
+              "paymentPreference": [
+                  "KHALTI",
+                  
+                  ],
+              "eventHandler": {
+                  onSuccess (payload) {
+                      
+                      console.log(payload);
+                      axios.get("/accounts/verify-payment/", {
+                          params : {
+                              "token" : payload.token,
+                              "amount" : payload.amount,
+                              "order_id" : '{{order.uid}}',
+
+                          }
+                      }).then(function(res){
+                          if (res.data.success){
+                            // create a popup element
+                            var popupParent = document.createElement("div");
+                            popupParent.classList.add("popup__parent");
+
+                            var popup = document.createElement("div");
+                            popup.classList.add("popup");
+
+                            // create a checked sign element
+                            var checkSign = document.createElement("img");
+                            checkSign.src = "https://cdn-icons-png.flaticon.com/512/5709/5709755.png";
+                            checkSign.classList.add("popup__check-sign");
+                            popup.appendChild(checkSign);
+
+                            // create a text element
+                            var text = document.createElement("p");
+                            text.textContent = "Payment Success";
+                            text.classList.add("popup__text");
+                            popup.appendChild(text);
+
+                            // create a button element
+                            var button = document.createElement("button");
+                            button.textContent = "Continue";
+                            button.classList.add("popup__button");
+                            button.addEventListener("click", function () {
+                                location.href = "/";
+                            });
+                            popup.appendChild(button);
+
+                            popupParent.appendChild(popup);
+
+                            // append the popup parent element to the body
+                            document.body.appendChild(popupParent);
+
+                          }else{
+                            alert("Sorry an error occured")
+                            location.href = "{{ request.build_absolute_uri }"
+                          }
+                      })
+                      
+                  },
+                  onError (error) {
+                      console.log(error);
+                  },
+                  onClose () {
+                      console.log('widget is closing');
+                  }
+              }
+          };
+  
+          var checkout = new KhaltiCheckout(config);
+          var amount = {{order.total}}*100;
+          var btn = document.getElementById("payment-button");
+          btn.onclick = function () {
+              
+              checkout.show({amount:amount});
+          }
+  </script> 
+
+
+{%endblock%}

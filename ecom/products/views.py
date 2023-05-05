@@ -12,7 +12,7 @@ from .forms import ProductForm
 
     
 def home(request):
-    products = Product.objects.all().order_by('-created_at')
+    products = Product.objects.filter(is_sold = False).order_by('-created_at')
     paginator = Paginator(products, 4)
     page_number = request.GET.get('page', 1)
     productsData = paginator.get_page(page_number)

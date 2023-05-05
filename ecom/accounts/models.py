@@ -12,7 +12,7 @@ class Profile(BaseModel):
     is_email_verified = models.BooleanField(default=False)
     email_token = models.CharField(max_length=200, null = True, blank = True)
     email_code = models.PositiveBigIntegerField(default=0)
-    profile_image = models.ImageField(upload_to="profile")
+    profile_image = models.ImageField(upload_to="profile", default="public/static/default/profile.jpg")
     address = models.CharField(max_length=200, null = True, blank = True)
     mobile = models.PositiveBigIntegerField(null=True, blank=True)
     status = models.BooleanField(default = True)

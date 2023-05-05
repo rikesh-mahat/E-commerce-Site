@@ -1,11 +1,12 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import requests
 from .models import Order
 import random
 from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth import login, authenticate, logout
 import uuid
 from django.db.models import Q
@@ -256,6 +257,8 @@ def checkout_cart(request, uid):
     product = Product.objects.get(uid = uid)
     
     if user.is_authenticated:
+        profile = user.profile
+        
         cart = get_or_create_cart(request)
         if cart.get_total_cartitems() > 0:
            item = cart.cart_items.all()[0]
@@ -280,32 +283,124 @@ def checkout_cart(request, uid):
                 cart.save()
                 
                 product.is_sold = True
+                product.save()
                 
                 cartid = request.session.get('cart.uid')
-                if not cartid:
+                if cartid:
                    del request.session['cart.uid']
                 return redirect('home')
+            elif payment == 'Khalti':
+                order.payment = PAYMENT[1][1]
+                order.save()
                 
+                return redirect(reverse('order', kwargs={'uid': order.uid}))
+                
+    return render(request, 'accounts/checkout.html', {'item':product, 'profile' : profile})
+
+def display_order(request, uid):
+    order = Order.objects.get(uid = uid)
+    print(order)
+    cart =  order.cart
+    print(cart)
+    cart_items = cart.cart_items.all()
+    print(cart_items)
+    context = {
+        'items' : cart_items,
+        'cart' : cart,
+        'order' : order
+    }
+    return render(request, 'accounts/khalti.html', context)
+
+def verify_payment(request):
+    user = request.user
     
-    return render(request, 'accounts/checkout.html', {'item':product})
-
-
+    if request.method == "GET":
+        token = request.GET.get("token")
+        amount = request.GET.get("amount")
+        order_id = request.GET.get("order_id")
+        print("\n\n\n", order_id)
+        data = {"success" : "True"}
+        
+        
+        url = "https://khalti.com/api/v2/payment/verify/"
+        
+        payload = {
+                    'token': token,
+                    'amount': amount
+                }
+        headers = {
+            'Authorization': 'Key test_secret_key_b799d0896a034ec8beb7d4fc9f5e2e75'
+        }
+        
+        response = requests.post(url, payload, headers=headers)
+        resp_dict = response.json()
+        if resp_dict.get("idx"):
+            # returning the payment status
+            success = True
+            # tracing the order id and editing
+            order = Order.objects.get(uid = order_id)
+            order.payment_completed = True
+            order.save()
+            
+            cart = order.cart
+            cart.is_checkedout = True
+            cart.save()
+            
+            product = cart.cart_items.all()[0]
+            item = product.product
+            item.is_sold = True
+            item.save()
+            
+            cartid = request.session.get('cart.uid')
+            if cartid:
+                del request.session['cart.uid']
+            
+            
+        else:
+            success = False
+        
+        data = {
+            'success' : success
+        }
+        
+    return JsonResponse(data)
 
 def customer_profile(request):
     userObj = request.user
     user = User.objects.get(id=userObj.id)
-
-    orders = Order.objects.filter(cart__user=user).order_by('-created_at')
+    profile = user.profile
+    carts = Cart.objects.filter(user = userObj)
+    
+   
+    
     context = {
-        'orders': orders,
+        'carts' : carts,
+        'profile' : profile
     }
 
     if request.method == "POST":
-        pass
-
+        files = request.FILES.get('profile')
+        print(files)
+        if files:
+            profile.profile_image = files
+        fname = request.POST.get('fname')
+        lname = request.POST.get('lname')
+        email = request.POST.get('email')
+        mobile = request.POST.get('mobile')
+        address = request.POST.get('address')
+        
+        userObj.first_name = fname
+        userObj.last_name = lname
+        userObj.save()
+        
+        profile.email = email
+        profile.mobile = mobile
+        profile.address = address
+        profile.save()
+        
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-    return render(request, 'accounts/profile.html', context)
+    return render(request, 'accounts/myprofile.html', context)
 
 
 # def admin_login(request):

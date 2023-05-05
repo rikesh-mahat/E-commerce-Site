@@ -22,7 +22,7 @@
               <a href="{%url 'cart'%}" class="border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-shopping-cart m-1 me-md-2"></i><p class="d-none d-md-block mb-0">My cart</p> </a>
               {%if request.user.is_authenticated%}
               &nbsp;
-              <a href="" class="me-1 border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-user-alt m-1 me-md-2"></i><p class="d-none d-md-block mb-0">Profile</p> </a>
+              <a href="{%url 'customer_profile'%}"} class="me-1 border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-user-alt m-1 me-md-2"></i><p class="d-none d-md-block mb-0">Profile</p> </a>
               <a href="{%url 'logout'%}" class="me-1 border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-sign-out-alt m-1 me-md-2"></i><p class="d-none d-md-block mb-0">Logout</p> </a>
               {%else%}
               &nbsp;

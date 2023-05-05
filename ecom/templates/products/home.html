@@ -3,7 +3,12 @@
 {%block start%}
 
 
-
+<style>
+  .card-img-top:hover{
+    
+    
+  }
+</style>
 
 <section>
   <div class="container my-5">
@@ -18,7 +23,7 @@
         <div class="card w-100 my-2 shadow-2-strong">
           <img src="{{product.product_image.first.image.url}}" class="card-img-top" style="aspect-ratio: 1 / 1" />
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title">{{product.name}}</h5>
+            <h5 class="card-title">{{product.product_name}}</h5>
             <p class="card-text">Rs {{product.price}}</p>
             <div class="card-footer d-flex align-items-end pt-3 px-0 pb-0 mt-auto">
               <a href="{%url 'get_product' product.slug%}" class="btn btn-outline-dark shadow-0 me-1">View Item</a>

@@ -55,13 +55,13 @@
           <div class="row mb-4">
             <div class="col">
               <div class="form-outline">
-                <input type="text" id="form6Example1" class="form-control" name="firstname" value="{{request.user.firstname}}" required/>
+                <input type="text" id="form6Example1" class="form-control" name="firstname" value="{{request.user.first_name | title}}" required/>
                 <label class="form-label" for="form6Example1">First name</label>
               </div>
             </div>
             <div class="col">
               <div class="form-outline">
-                <input type="text" id="form6Example2" class="form-control" name="lastname" value="{{request.user.lastname}}" required/>
+                <input type="text" id="form6Example2" class="form-control" name="lastname" value="{{request.user.last_name | title}}" required/>
                 <label class="form-label" for="form6Example2">Last name</label>
               </div>
             </div>
@@ -70,14 +70,14 @@
           <div class="row mb-4">
             <div class="col">
               <div class="form-outline">
-                <input type="email" id="form6Example5" class="form-control" name="email" required/>
+                <input type="email" id="form6Example5" class="form-control" name="email" value="{%if profile.email %}{{profile.email}} {%else%} {{request.user.username}}{%endif%}" required/>
                 <label class="form-label" for="form6Example5">Email</label>
               </div>
             </div>
 
             <div class="col">
               <div class="form-outline">
-                <input type="number" id="form6Example6" class="form-control" name="mobile" required/>
+                <input type="number" id="form6Example6" class="form-control" name="mobile" value="{{profile.mobile}}" required/>
                 <label class="form-label" for="form6Example6">Phone</label>
               </div>
             </div>
@@ -85,7 +85,7 @@
 
           <!-- Text input -->
           <div class="form-outline mb-4">
-            <input type="text" id="form6Example4" class="form-control" name="address"  required/>
+            <input type="text" id="form6Example4" class="form-control" name="address" value="{{profile.address}}" required/>
             <label class="form-label" for="form6Example4">Address</label>
           </div>
 
