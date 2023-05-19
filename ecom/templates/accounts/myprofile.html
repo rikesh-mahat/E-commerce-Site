@@ -217,7 +217,7 @@
               </div> {% endcomment %}
               <div class="col-6 text-end">
                 {% if cart.orders.order_status == 'Order Received' or cart.orders.order_status == 'Order Processing'%}
-                    <a href="" class="btn btn-outline-danger text-danger icon-hover-danger">Cancel Order</a>
+                    <a href="{%url 'cancel_order' cart.orders.uid%}" class="btn btn-outline-danger text-danger icon-hover-danger">Cancel Order</a>
                 {% endif %}
   
               </div>

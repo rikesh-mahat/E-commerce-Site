@@ -1,12 +1,24 @@
+<style>
+  .zoomable-image {
+    overflow: hidden;
+}
 
+.zoomable-image img {
+    transition: transform 0.8s;
+}
+
+.zoomable-image img:hover {
+    transform: scale(1.1);
+}
+
+.btn .btn-outline-dark:hover{
+  background-color:black !important;
+}
+</style>
 
 {% extends 'base/base.html' %}
 
-<style>
-  .btn .btn-outline-dark:hover{
-    background-color:black !important;
-  }
-</style>
+
 
 {% block start %}
 
@@ -15,7 +27,9 @@
 <section class="p-1" style="padding:0;">
   <div class="container px-4 px-lg-9 my-5">
     <div class="row gx-4 gx-lg-5 align-items-center">
-      <div class="col-md-6"><img class="card-img-top" src="{{product.product_image.first.image.url}}" alt="{{product.product_name | title.} image" style="height: 400px; width: 400px;" /></div>
+      
+      <div class="col-md-6"><img class="card-img-top zoomable-image" src="{{product.product_image.first.image.url}}" alt="{{product.product_name | title.} image" style="height: 400px; width: 400px;" /></div>
+      
       <div class="col-md-6">
         <h1 class="display-5 fw-bolder">{{product.product_name | title}}</h1>
         <div class="fs-5 mb-5">
@@ -27,12 +41,16 @@
         </div>
         <div class="d-flex align-items-evenly">
           
+          {%if request.user.is_authenticated%}
             <div class="d-flex align-items-center">
               <a class="btn btn-primary" href="{%url 'checkout_cart' product.uid%}">Buy Product</a>
               &nbsp;&nbsp;
               <a class="btn btn-outline-dark" href="">Add to Wishlist</a>              
              
             </div>
+            {%endif%}
+
+
           
           
         </div>
@@ -123,9 +141,15 @@
   <div class="card mb-4" >
     <div class="card-body">
       <div class="d-flex flex-start align-items-center">
+        {%if comment.user.first_name%}
         <img class="rounded-circle shadow-1-strong me-3"
+        src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(19).webp" alt="avatar" width="60"
+        height="60" />
+        {%else%}
+          <img class="rounded-circle shadow-1-strong me-3"
           src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(19).webp" alt="avatar" width="60"
           height="60" />
+          {%endif%}
         <div>
           <h6 class="fw-bold text-primary mb-1">{{comment.user.first_name}} {{comment.user.last_name}}</h6>
           <p class="text-muted small mb-0">
@@ -139,7 +163,7 @@
       </p>
 
       <div class="small d-flex justify-content-start">
-        <a href="{%url 'delete_comment' comment.id%}" class="d-flex align-items-center me-3">
+        <a href="{%url 'delete_comment' comment.uid%}" class="d-flex align-items-center me-3">
           <i class="far fa-trash-alt me-2"></i>
 
           <p class="mb-0">Delete</p>
@@ -196,6 +220,22 @@
       submitButton.disabled = false; // enable the submit button
     }
   });
+
+
+  const zoomableImages = document.querySelectorAll('.zoomable-image');
+  zoomableImages.forEach(image => {
+      image.addEventListener('mousemove', e => {
+          const img = image.querySelector('img');
+          const boundingRect = img.getBoundingClientRect();
+          const xPos = e.clientX - boundingRect.left;
+          const yPos = e.clientY - boundingRect.top;
+          const xPercent = xPos / img.offsetWidth * 100;
+          const yPercent = yPos / img.offsetHeight * 100;
+          img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+      });
+  });
 </script>
+
+
 
 {% endblock %}

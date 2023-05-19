@@ -1,4 +1,4 @@
-<!--Main Navigation-->
+{%load static%}
 <head><link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.15.3/css/all.css" integrity="..." crossorigin="anonymous"></head>
 <header class="sticky-top">
     <!-- Jumbotron -->
@@ -7,9 +7,9 @@
         <div class="row gy-3">
           <!-- Left elements -->
           <div class="col-lg-2 col-sm-4 col-4">
-            <a href="https://mdbootstrap.com/" target="_blank" class="float-start">
-              <img src="" alt="My Logo" height="35" />
-            </a>
+            
+              <img src="{%static 'images/logo.png' %}" alt="Recycle Nepal" height="35" />
+      
           </div>
           <!-- Left elements -->
   
@@ -19,7 +19,7 @@
               {%if request.user.is_authenticated%}
               <a href="" class="me-1 border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-heart m-1 me-md-2"></i><p class="d-none d-md-block mb-0">Wishlist</p> </a>
               {%endif%}&nbsp;
-              <a href="{%url 'cart'%}" class="border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-shopping-cart m-1 me-md-2"></i><p class="d-none d-md-block mb-0">My cart</p> </a>
+          
               {%if request.user.is_authenticated%}
               &nbsp;
               <a href="{%url 'customer_profile'%}"} class="me-1 border rounded py-1 px-3 nav-link d-flex align-items-center"> <i class="fas fa-user-alt m-1 me-md-2"></i><p class="d-none d-md-block mb-0">Profile</p> </a>
@@ -83,6 +83,11 @@
             <li class="nav-item">
               <a class="nav-link text-dark" href="{%url 'all_category'%}">Categories</a>
             </li>
+            {%if request.user.is_authenticated%}
+            <li class="nav-item">
+              <a class="nav-link text-dark" href="{%url 'my_product'%}">My Products</a>
+            </li>
+            {%endif%}
           
             
           </ul>

@@ -1,14 +1,32 @@
 from django.contrib import admin
 from .models import *
 # Register your models here.
-admin.site.register([ProductImages, Category, Comment])
+
 
 class ProductImageAdmin(admin.StackedInline):
     model = ProductImages
     
-class ProductAdmin(admin.ModelAdmin):
+
+
+class AdminProduct(admin.ModelAdmin):
     inlines = [ProductImageAdmin]
+    list_display = ['product_name', 'product_description', 'slug', 'owner', 'price', 'sold', 'category']
+
+    search_fields = ['product_name', 'price']
+
+    def sold(self, obj):
+        status = "Sold" if obj.is_sold else "Unsold"
+        return status
+
+    list_editable = ['category']
+    
+admin.site.register(Product, AdminProduct)
 
 
-admin.site.register(Product, ProductAdmin)
 
+class AdminCategory(admin.ModelAdmin):
+    list_display = ['category_name']
+    search_fields = ['category_name']
+    
+    
+admin.site.register(Category, AdminCategory)

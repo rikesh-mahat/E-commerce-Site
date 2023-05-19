@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from django.views.generic.edit import UpdateView
 from django.urls import reverse_lazy
 from .forms import ProductForm
-# Create your views here.
+
 
 
     
@@ -21,10 +21,16 @@ def home(request):
     return render(request, 'products\home.html', {'products': productsData})
 
 def get_product(request, slug):
-   
+    
+    
     productObj  = Product.objects.get(slug=slug)
+    
+       
+    if productObj.owner == request.user:
+        return redirect('display_user_product')
     productObj.view_count += 1
     productObj.save()
+    
     
     
     other_products = Product.objects.all()
@@ -89,10 +95,16 @@ def create_product(request):
 
 def display_user_product(request):
     if request.user.is_authenticated:
-        user_products = Product.objects.filter(owner = request.user)
-        context = {'products' : user_products}
+        user_products = Product.objects.filter(owner = request.user).order_by('is_sold')
+        paginator = Paginator(user_products, 4)
+        page_number = request.GET.get('page', 1)
+        productsData = paginator.get_page(page_number)
+        context = {'products' : productsData}
         print(user_products)
-        return render(request, 'products/user_product.html', context)
+        return render(request, 'products/myproducts.html', context)
+
+
+
     
     
 def delete_product(request, uid):

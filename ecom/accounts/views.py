@@ -198,22 +198,22 @@ def get_or_create_cart(request):
 
     return cart
 
-def cart(request):
-    cart = get_or_create_cart(request)
+# def cart(request):
+#     cart = get_or_create_cart(request)
 
-    if cart.uid:
+#     if cart.uid:
         
-        context = {
-            'cart': cart,
-            'cart_items': cart.cart_items.all()
-        }
-        if not cart.cart_items.all().count():
-            messages.info(
-                request, 'No items in cart. Please continue shopping')
-        return render(request, 'accounts/cart.html', context)
-    else:
-        messages.info(request, 'Add items to your cart')
-    return render(request, 'accounts/cart.html')
+#         context = {
+#             'cart': cart,
+#             'cart_items': cart.cart_items.all()
+#         }
+#         if not cart.cart_items.all().count():
+#             messages.info(
+#                 request, 'No items in cart. Please continue shopping')
+#         return render(request, 'accounts/cart.html', context)
+#     else:
+#         messages.info(request, 'Add items to your cart')
+#     return render(request, 'accounts/cart.html')
 
 
 # def add_to_cart(request, uid):
@@ -366,10 +366,11 @@ def verify_payment(request):
     return JsonResponse(data)
 
 def customer_profile(request):
+    
     userObj = request.user
     user = User.objects.get(id=userObj.id)
     profile = user.profile
-    carts = Cart.objects.filter(user = userObj)
+    carts = Cart.objects.filter(user = userObj).order_by('-created_at')
     
    
     
@@ -562,3 +563,17 @@ def search_items(request):
 #         user.status = True
 #     user.save()
 #     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+
+def cancel_order(request, uid):
+    order = Order.objects.get(uid = uid)
+    cart = order.cart
+    if cart.uid:
+        product = cart.cart_items.all()[0]
+        product.product.is_sold = False
+        product.product.save()
+    order.delete()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+

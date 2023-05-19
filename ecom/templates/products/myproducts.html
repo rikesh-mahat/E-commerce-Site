@@ -13,12 +13,12 @@
 <section>
   <div class="container my-5">
     <header class="mb-4">
-      <h3>Our Products</h3>
+      <h3>Your Products</h3>
     </header>
 
     <div class="row">
       {%for product in products%}
-      {%if not product.owner == request.user%}
+      
       <div class="col-lg-3 col-md-6 col-sm-6 d-flex">
         <div class="card w-100 my-2 shadow-2-strong">
           <img src="{{product.product_image.first.image.url}}" class="card-img-top" style="aspect-ratio: 1 / 1" />
@@ -26,15 +26,19 @@
             <h5 class="card-title">{{product.product_name}}</h5>
             <p class="card-text">Rs {{product.price}}</p>
             <div class="card-footer d-flex align-items-end pt-3 px-0 pb-0 mt-auto">
-              <a href="{%url 'get_product' product.slug%}" class="btn btn-outline-dark shadow-0 me-1">View Item</a>
-              {%if request.user.is_authenticated%}
-              <a href="" class="btn btn-light border px-2 pt-2 icon-hover"><i class="fas fa-heart fa-lg text-secondary px-1"></i></a>
+
+              {%if not product.is_sold%}
+              <a href="" class="btn btn btn-outline-secondary shadow-0 me-1">Edit </a>
+              
+              <a href="" class="btn btn-outline-danger shadow-0 me-1">Delete  </a>
+              {%else%}
+              <a href="" class="btn btn-success shadow-0 me-1">Sold Out</a>
               {%endif%}
             </div>
           </div>
         </div>
       </div>
-      {%endif%}
+    
       {%endfor%}
     </div>
     <div class="row" style="margin-top:1rem;">
