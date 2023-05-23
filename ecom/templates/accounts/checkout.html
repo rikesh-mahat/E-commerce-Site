@@ -25,7 +25,7 @@
               <div class="me-3 position-relative">
                
                 <img
-                  src="{{item.product_image.first.image.url}}"
+                  src="{{item.product_image.last.image.url}}"
                   class="img-fluid rounded border" style="height: 96px; width: 96px;" alt="{{item.item.product_name}} image"
                 />
               </div>
@@ -101,7 +101,7 @@
           <!-- Submit button -->
           <div class="float-end mt-3">
             <a
-              href=""
+              href="{%url 'home'%}"
               class="btn btn-light border text-danger icon-hover-danger"
               >Cancel</a
             >

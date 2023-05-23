@@ -409,7 +409,12 @@ def verify_payment(request):
             if cartid:
                 del request.session['cart.uid']
             
+            username = user.first_name + " " + user.last_name
+            email = cart.user.username 
+            send_invoice_email(username, order, email)
             
+            owner = item.owner.first_name + " " + item.owner.last_name
+            send_congratulation_email(owner, order, item.owner.username)
         else:
             success = False
         
@@ -768,3 +773,24 @@ def delete_orders(request):
                         cart.delete()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
                 
+@login_required()          
+def change_password(request):
+    user = request.user
+    if user.is_authenticated:
+        if request.method == "POST":
+            pass1 = request.POST.get('pass1')
+            pass2 = request.POST.get('pass2')
+            
+            msg = check_password(pass1, pass2)
+            if msg.lower() != "valid":
+                messages.error(request, msg)
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            
+            user.set_password(pass2)
+            user.save()
+            
+            messages.info(request, "Your password has been changed.")
+            return redirect('login')
+    return render(request, 'accounts/changepassword.html')
+
+

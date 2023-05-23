@@ -9,10 +9,12 @@ from django.urls import reverse_lazy
 from .forms import ProductForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-
+from django.db.models import Q
     
 def home(request):
     products = Product.objects.filter(is_sold = False).order_by('-created_at')
+    if request.user.is_authenticated:
+        Product.objects.exclude(is_sold=True, owner=request.user).order_by('-created_at')
     paginator = Paginator(products, 5)
     page_number = request.GET.get('page', 1)
     productsData = paginator.get_page(page_number)
@@ -31,9 +33,9 @@ def get_product(request, slug):
     productObj.view_count += 1
     productObj.save()
     
-    
-    
     other_products = Product.objects.filter(is_sold = False)
+    if request.user.is_authenticated:
+        other_products = Product.objects.exclude(is_sold=True, owner=request.user)
     paginator = Paginator(other_products, 5)
     page_number = request.GET.get('p')
     other_products_data = paginator.get_page(page_number)
@@ -150,10 +152,9 @@ def update_product(request, slug):
             form.instance.owner = request.user
             form.save()
             
-            # Save the images
+            
             images = request.FILES.getlist('product_images')
             for image in images:
-                
                 ProductImages.objects.create(product=product, image=image)
             return redirect('my_product')
     else:
