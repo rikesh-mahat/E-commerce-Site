@@ -5,7 +5,7 @@ from accounts.models import Cart
 from .forms import ProductForm
 from django.core.paginator import Paginator
 from django.views.generic.edit import UpdateView
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from .forms import ProductForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -29,7 +29,8 @@ def get_product(request, slug):
     
        
     if productObj.owner == request.user:
-        return redirect('display_user_product')
+        return redirect('my_product')
+    
     productObj.view_count += 1
     productObj.save()
     
@@ -152,10 +153,15 @@ def update_product(request, slug):
             form.instance.owner = request.user
             form.save()
             
+            product_images = ProductImages.objects.filter(product= product)
+            for images in product_images:
+                images.delete()
+            
             
             images = request.FILES.getlist('product_images')
-            for image in images:
-                ProductImages.objects.create(product=product, image=image)
+            if len(images) > 0:
+                for image in images:
+                    ProductImages.objects.create(product=product, image=image)
             return redirect('my_product')
     else:
         form = ProductForm(instance=product)

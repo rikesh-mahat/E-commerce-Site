@@ -203,11 +203,14 @@ def reset_password(request):
     return render(request, 'accounts/resetpassword.html')
 
 def activate_user(request, email_token):
- 
-    user = Profile.objects.get(email_token=email_token)
-    user.is_email_verified = True
-    user.save()
-    return redirect(request, 'login')
+    try:
+        user = Profile.objects.get(email_token=email_token)
+        user.is_email_verified = True
+        user.save()
+        return HttpResponse("Your Account has been Activated. Please proceed to login")
+    except:
+        messages.info(request, "Your id has been activate")
+        return HttpResponse("Activated your account please procced to login")
    
 
 
@@ -299,7 +302,8 @@ def get_or_create_cart(request):
 def checkout_cart(request, uid):
     user  = request.user
     product = Product.objects.get(uid = uid)
-    
+    if product.is_sold:
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     if product.owner == user:
         messages.warning(request, "Cannot buy your own product")
         return redirect('my_product')

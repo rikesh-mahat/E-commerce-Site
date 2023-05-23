@@ -15,7 +15,7 @@
             <div class="col-md-6 col-lg-7 d-flex align-items-center">
               <div class="card-body p-4 p-lg-5 text-black">
 
-                <form method="POST" onsubmit="return validateForm()" name="loginForm">
+                <form method="POST" onsubmit="return validateForm()" name="loginForm" id="signup-form">
                   {%csrf_token%}
                   <div class="d-flex align-items-center mb-3 pb-1">
                     <i class="fas fa-cubes fa-2x me-3" style="color: #ff6219;"></i>
@@ -90,7 +90,7 @@
 
 
 <script>
-// Get the form element
+  // Get the form element
 const form = document.getElementById('signup-form');
 
 // Get the input fields
@@ -100,35 +100,26 @@ const confirmPasswordField = form.querySelector('input[name="pass2"]');
 
 // Add a submit event listener to the form
 form.addEventListener('submit', (event) => {
-  // Prevent the default form submission
-  event.preventDefault();
+// Prevent the default form submission
+event.preventDefault();
 
-  // Perform password validation
-  const password = passwordField.value;
-  const confirmPassword = confirmPasswordField.value;
-  if(password.length <= 8){
-    const errorMessage = document.createElement('div')
-    errorMessage.className = 'invalid-feedback';
-    errorMessage.innerText = 'Minimum 8 characters required';
-    confirmPasswordField.classList.add('is-invalid');
-    confirmPasswordField.parentElement.appendChild(errorMessage);
-    return;
+// Perform password validation
+const password = passwordField.value;
+const confirmPassword = confirmPasswordField.value;
+if (password !== confirmPassword) {
+  // Show an error message
+  const errorMessage = document.createElement('div');
+  errorMessage.className = 'invalid-feedback';
+  errorMessage.innerText = 'Passwords do not match';
+  confirmPasswordField.classList.add('is-invalid');
+  confirmPasswordField.parentElement.appendChild(errorMessage);
+  return;
+}
 
-  }
-  if (password !== confirmPassword) {
-    // Show an error message
-    const errorMessage = document.createElement('div');
-    errorMessage.className = 'invalid-feedback';
-    errorMessage.innerText = 'Passwords do not match';
-    confirmPasswordField.classList.add('is-invalid');
-    confirmPasswordField.parentElement.appendChild(errorMessage);
-    return;
-  }
 
-  // Submit the form if validation passes
-  form.submit();
-});
 
+// Submit the form if validation passes
+form.submit();
 });
 </script>
 

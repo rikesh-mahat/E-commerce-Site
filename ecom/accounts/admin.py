@@ -16,20 +16,11 @@ class AdminProfile(admin.ModelAdmin):
   
 admin.site.register(Profile, AdminProfile)
 
-'''
-    cart = models.OneToOneField(Cart, on_delete=models.CASCADE, null=True, blank=True,related_name='orders')
-    ordered_by = models.CharField(max_length=200)
-    shipping_address = models.CharField(max_length=200)
-    mobile = models.CharField(max_length=15)
-    email = models.EmailField(null = True, blank=True)
-    total = models.PositiveIntegerField()
-    order_status = models.CharField(max_length=50, choices = ORDER_STATUS, default = ORDER_STATUS[0][0])
-    payment_method = models.CharField(max_length = 50, choices = PAYMENT, default = PAYMENT[0][0])
-    payment_completed = models.BooleanField(default=False, null = True, blank = True)
-'''
+
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['ordered_by', 'shipping_address', 'mobile', 'email', 'total', 'payment', 'order_status']
-    
+    list_filter = ['payment_completed']
+    search_fields = ['ordered_by', 'shipping_address', 'mobile', 'email']
     def payment(self, obj):
         status = "Paid" if obj.payment_completed else "Unpaid"
         return status
