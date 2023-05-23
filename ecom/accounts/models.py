@@ -64,7 +64,7 @@ class Wishlist(models.Model):
     
 class WishlistItems(models.Model):
     wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='wishlist_items')
-    item = models.ForeignKey(Product, on_delete=models.CASCADE)
+    item = models.ForeignKey(Product, on_delete=models.CASCADE, related_name= 'wish_items')
     
     def __str__(self):
         return self.wishlist.user.username 

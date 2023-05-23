@@ -1,6 +1,6 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import requests
-from .models import Order
+from .models import *
 import random
 from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import render, redirect
@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth import login, authenticate, logout
 import uuid
 from django.db.models import Q
-from base.emails import send_account_activation_mail, send_forgotpassword_email
+from base.emails import *
 from accounts.models import Profile, Cart, CartItems, Order, ORDER_STATUS, PAYMENT
 from django.http import HttpResponseRedirect
 from products.models import Product
@@ -18,19 +18,40 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import re
-# Create your views here.
-# assign cart to a user if he/she logins to the system
 
 
-
-# def authenticate_password(email, pass1, pass2):
-#     message = ""
-#     status = "False"
+# code for password checking
+def check_password(pass1, pass2):
     
-#     if len(pass1) < 8:
-#         message = "Password Ch"
-#     email_name = email.split('@')[0]
-#     contains = re.findall(pass1, email)
+    # message  returned at last
+    msg = "valid" 
+    
+    if len(pass1) < 8:    # if password length is less than 8 characters
+        msg = "Password should minimum 8 characters long"
+        return msg
+    pattern = r'[a-zA-Z]'
+    
+    if not re.search(pattern, pass1):  # if password only contains only numbers
+        msg = "All numeric password not allowed, please use some characters and alphabets"
+        return msg
+    
+    if not re.search(r'\d', pass1):  # if password only contains alphabes and no numbers
+        msg = "Please use some numbers along with alphabets"
+        return msg
+     
+    if pass1 != pass2:  # if password do not match
+        msg = "Password do not match"
+        return msg
+    
+    return msg  # return the msg 
+
+
+
+# mobile number validation
+def validate_mobile_number(mobile):
+    #  provide the regex pattern (should be 10 digit number)
+    pattern = re.compile(r'^\d{10}$')
+    return bool(pattern.match(mobile))   # return true if number is 10 digit else return false
     
 
 def login_user(request):
@@ -84,9 +105,22 @@ def register_user(request):
             messages.warning(request, "Sorry the email is already in use")
             return HttpResponseRedirect(request.path_info)
 
-        if pass1 != pass2:
-            messages.warning(request, "Password do not match")
-            return HttpResponseRedirect(request.path_info)
+        # validate user mobile
+        mobile_validation = validate_mobile_number(mobile)  # validate_mobile_number function
+        
+        # if mobile number not valid notify the user
+        if not mobile_validation:
+            messages.warning(request, "Please enter a valid mobile number")
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        
+        
+         # check for the user password 
+        msg = check_password(pass1, pass2)  # check_password function
+        
+        # if function return other msg instead of valid notify user what is wrong
+        if msg.lower() != "valid":
+                messages.warning(request, msg)
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
         registered_user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=email)
         registered_user.set_password(pass2)
@@ -96,7 +130,9 @@ def register_user(request):
         register_customer = Profile.objects.create(user=registered_user, address=address, mobile=mobile, email_token=email_token)
         register_customer.save()
         messages.info(request, 'An Email has been sent to you email for activation')
-        send_account_activation_mail(email, email_token)
+        
+        username = registered_user.first_name + registered_user.last_name
+        send_account_activation_mail(username, email, email_token)
         
         if "next" in request.GET:
             next_url = request.GET.get("next")
@@ -109,6 +145,8 @@ def register_user(request):
 
 def forgot_password(request):
     if request.method == "POST":
+        
+
     # first check if user exist or not then only send verification code
         username = request.POST.get("email")
         userObj = User.objects.filter(email = username)
@@ -120,7 +158,10 @@ def forgot_password(request):
         profile.email_code = auth_code
         profile.save()
         
-        send_forgotpassword_email(username, auth_code)
+        
+        user = User.objects.get(username = username)
+        fullname = user.first_name + user.last_name
+        send_verification_code(fullname, auth_code, username)
         
         # store it in the session
         request.session['username'] = username
@@ -145,8 +186,12 @@ def reset_password(request):
         pass1 = request.POST.get('pass1')
         pass2 = request.POST.get('pass2')
         
-        if pass1 != pass2:
-            messages.info(request, "Password do not match")
+      
+        msg = check_password(pass1, pass2)  
+        
+        if msg.lower() != "valid":
+                messages.warning(request, msg)
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         
         user = User.objects.get(username = username)
         user.set_password(pass2)
@@ -158,13 +203,12 @@ def reset_password(request):
     return render(request, 'accounts/resetpassword.html')
 
 def activate_user(request, email_token):
-    try:
-        user = Profile.objects.get(email_token=email_token)
-        user.is_email_verified = True
-        user.save()
-        return redirect(request, 'login')
-    except Exception as e:
-        return HttpResponse('Invalid token')
+ 
+    user = Profile.objects.get(email_token=email_token)
+    user.is_email_verified = True
+    user.save()
+    return redirect(request, 'login')
+   
 
 
 def logout_user(request):
@@ -251,11 +295,14 @@ def get_or_create_cart(request):
 #     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-
+@login_required()
 def checkout_cart(request, uid):
     user  = request.user
     product = Product.objects.get(uid = uid)
     
+    if product.owner == user:
+        messages.warning(request, "Cannot buy your own product")
+        return redirect('my_product')
     if user.is_authenticated:
         profile = user.profile
         
@@ -288,6 +335,12 @@ def checkout_cart(request, uid):
                 cartid = request.session.get('cart.uid')
                 if cartid:
                    del request.session['cart.uid']
+                
+                username = user.first_name + " " + user.last_name 
+                send_invoice_email(username, order, email)
+                
+                owner = product.owner.first_name + " " + product.owner.last_name
+                send_congratulation_email(owner, order, product.owner.username)
                 return redirect('home')
             elif payment == 'Khalti':
                 order.payment = PAYMENT[1][1]
@@ -297,6 +350,7 @@ def checkout_cart(request, uid):
                 
     return render(request, 'accounts/checkout.html', {'item':product, 'profile' : profile})
 
+@login_required()
 def display_order(request, uid):
     order = Order.objects.get(uid = uid)
     print(order)
@@ -365,23 +419,38 @@ def verify_payment(request):
         
     return JsonResponse(data)
 
+
+@login_required()
 def customer_profile(request):
-    
+    delete_orders(request)
     userObj = request.user
     user = User.objects.get(id=userObj.id)
     profile = user.profile
     carts = Cart.objects.filter(user = userObj).order_by('-created_at')
     
-   
     
+    orders = []
+    for cart in carts:
+        if cart.is_checkedout:
+            order = Order.objects.filter(cart = cart)
+            if order.exists():
+                orders.append(order[0])
+            
+    count = len(orders)
+    
+    for order in orders:
+        print(order.uid)
+   
     context = {
-        'carts' : carts,
-        'profile' : profile
+        'orders' : orders,
+        'profile' : profile,
+        'count' : count
     }
 
     if request.method == "POST":
         files = request.FILES.get('profile')
-        print(files)
+        
+        
         if files:
             profile.profile_image = files
         fname = request.POST.get('fname')
@@ -389,15 +458,16 @@ def customer_profile(request):
         email = request.POST.get('email')
         mobile = request.POST.get('mobile')
         address = request.POST.get('address')
+        profile.email = email
+        profile.mobile = mobile
+        profile.address = address
+        profile.save()
         
         userObj.first_name = fname
         userObj.last_name = lname
         userObj.save()
         
-        profile.email = email
-        profile.mobile = mobile
-        profile.address = address
-        profile.save()
+        
         
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
@@ -495,10 +565,16 @@ def search_items(request):
     if request.method == "GET":
         keyword = request.GET.get('keyword')
         results = Product.objects.filter(Q(product_name__icontains=keyword))
+        
+        paginator = Paginator(results, 4)
+        page_number = request.GET.get('page', 1)
+        productsData = paginator.get_page(page_number)
         context = {
             'keyword': keyword,
-            'results': results,
+            'results': productsData,
         }
+        
+        
     return render(request, 'products/search.html', context)
 
 
@@ -569,11 +645,126 @@ def search_items(request):
 def cancel_order(request, uid):
     order = Order.objects.get(uid = uid)
     cart = order.cart
+    print("\n\n\n\n")
+    print(cart)
+    print("\n\n\n\n")
     if cart.uid:
-        product = cart.cart_items.all()[0]
+        product  = cart.cart_items.first()
         product.product.is_sold = False
         product.product.save()
     order.delete()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
+@login_required
+def check_wishlist(request):
+    
+    # check if user is authenticated
+     if request.user.is_authenticated:
+        
+        # get the user
+        user = request.user
+        
+        # filter for the wishlist of user
+        wishlist = Wishlist.objects.filter(user = user)
+        
+        # check if there is any wishlist and if yes return the wishlist
+        if wishlist.exists():
+            return wishlist[0]
+
+        # if there is not wishlist then create a new wishlist for that user
+        wishlist = Wishlist.objects.create(user = user)
+
+        # return the wishlist
+        return wishlist
+    
+    
+    
+### wishlist VIEW
+@login_required
+def wishlist(request):
+    
+    # get the wishlist of user from check wishlist function
+    wishlist = check_wishlist(request)
+    
+    # getting all the items present in the wishlist
+    wishlist_items = wishlist.wishlist_items.all()
+    
+    # message
+    message = ""
+    
+    # if there are not items in wishlist notify the user about no items in wishlist
+    if len(wishlist_items) == 0:
+        message = "You do not have any item in wishlist"
+        
+    # pass wishlist, wishlist_items and message to wishlist page
+    context = {
+        'wishlist' : wishlist,
+        'cart_items' : wishlist_items,
+        'message' : message
+    }
+    return render(request, 'accounts/wishlist.html', context)
+
+
+
+# add to wishlist VIEW
+@login_required
+def add_to_wishlist(request, uid):
+    
+    # get the item form database using id
+    item = Product.objects.get(uid = uid)
+    
+    # get the wishlist for check_wishlist function
+    wishlist = check_wishlist(request)
+    
+    # get the user
+    user  = request.user
+    
+    # if the item is not in wishlist then only create a new wishlist item (adding item to wishlist)
+    if not wishlist.wishlist_items.filter(item = item).exists():
+        wishlist_item = WishlistItems.objects.create(wishlist = wishlist, item = item)
+    
+    # redirect the user to wishlist page after adding the product
+    return redirect('wishlist')
+
+
+
+# removing the item from wishlist VIEW
+@login_required
+def remove_wishlist_item(request, id):
+    # get the wishlist item using its id
+    item = WishlistItems.objects.get(id = id)
+    
+    # delete the item
+    item.delete()
+    
+    # return to the same page
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+# clear the wishlist VIEW
+@login_required
+def delete_all_wishlist_items(request):
+    
+    # getting the user 
+    user = request.user
+    
+    # gettin the wishlist of that user
+    wishlist = Wishlist.objects.get(user = user)
+    
+    # deleting the wishlist from database
+    wishlist.delete()
+    
+    # returning to the same page
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+
+def delete_orders(request):
+    if request.user.is_authenticated:
+        carts = Cart.objects.filter(user = request.user)
+        if carts.exists():
+            for cart in carts:
+                if cart.uid and not cart.is_checkedout:
+                        cart.delete()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+                

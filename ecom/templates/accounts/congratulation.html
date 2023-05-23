@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+
+      body {
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .container{
+        width: 60%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+        border:1px solid grey;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      h2{
+        font-size: 28px;
+        font-weight: bold;
+        margin: 20px 0 10px 0;
+        color: #999;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      table tr td {
+        padding: 0;
+      }
+
+      th{
+        font-weight: bold;
+      }
+      
+      .large {
+        font-size: 1.75em;
+      }
+
+      .total {
+        font-weight: bold;
+        color: #fb7578;
+        margin-bottom: 0;
+      }
+
+      
+
+      .invoice-info-container {
+        font-size: 0.875em;
+        height: 70px;
+        background-color: 	#faf5ee;
+        border-radius: 10px;
+ 
+        
+      }
+      
+      .invoice-info-container td{
+        padding:2px 15px;
+      }
+
+      .greet{
+        font-weight: bold;
+      }
+
+      .line-items-container {
+        margin: 40px 0;
+        font-size: 0.875em;
+        background-color: rgb(243, 242, 242);
+        border-radius: 10px;
+      }
+
+      th {
+        text-align: left;
+        color: #999;
+        border-bottom: 2px solid #ddd;
+        padding: 10px 0 15px 0;
+        font-size: 0.75em;
+        text-transform: uppercase;
+      }
+
+     
+
+      .line-items-container td {
+        padding: 15px 15px;
+      }
+
+      .line-items-container th {
+        padding: 15px 15px;
+      }
+
+      .bottom-table{
+        margin: 40px 0;
+        font-size: 0.875em;
+      }
+
+      .bottom-table td{
+        padding-top: 15px;
+      }
+
+
+      .line-break{
+        margin: 0;
+        display: block;
+        width: 100%;
+        border-bottom: 2px solid #ddd;
+      }
+      
+      .footer {
+        margin-top: 20px;
+      }
+
+      .footer-thanks {
+        font-size: 1.125em;
+      }
+
+      .footer-thanks img {
+        display: inline-block;
+        position: relative;
+        top: 1px;
+        width: 16px;
+        margin-right: 4px;
+      }
+
+      .footer-info {
+        float: right;
+        margin-top: 5px;
+        font-size: 0.75em;
+        color: #ccc;
+      }
+
+      .footer-info span {
+        padding: 0 5px;
+        color: black;
+      }
+
+      .footer-info span:last-child {
+        padding-right: 0;
+      }
+
+      .img-container{
+        display:flex;   
+        justify-content:center;
+        align-items:center;
+      }
+      .congrats{
+        border-radius:10px;
+        height:300px;
+      }
+
+      
+    </style>
+  </head>
+  <body>
+
+    <div class="container">
+    
+    <h1>Congratulations</h1>
+    <p class="greet">Dear {{username}}, Congratulations !</p>
+    <br/>
+    <div class="img-container">   
+    <img class="congrats" src="https://static.vecteezy.com/system/resources/previews/010/636/596/original/congratulations-text-effect-colorful-design-and-effect-colorful-design-gradient-background-free-file-downloadable-free-vector.jpg" alt="congratulations" />
+    </div>
+    <h2>Payment Information</h2>
+    <table class="invoice-info-container">
+      <tr>
+        <td>Payment Date: <strong>{{order.created_at | date}}</strong></td>
+      </tr>
+      <tr>
+        <td>Payment No: <strong>{{number}}</strong></td>
+        
+      </tr>
+    </table>
+
+    <h2>Sold Item</h2>
+
+    <table class="line-items-container" >
+      <thead>
+        <tr>
+          <th>Qty</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%for item in items%} 
+        <tr>
+          <td>1</td>
+          <td>{{item.product.product_name}}</td>
+          <td>{{item.product.price|floatformat:2}}</td>
+          <td>{{item.product.price}}</td>
+        </tr>
+        {%endfor%}
+      </tbody>
+    </table>
+
+    <table class="bottom-table">
+      <thead>
+        <tr>
+          <th>Product Sold Out</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>  
+          <td class="large total">Thank for using our services</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <span class="line-break"></span>
+    <div class="footer">
+      <div class="footer-info">
+        <span>recyclenepal@gmail.com</span> | <span>9811851665</span> |
+        <span>recyclenepal.com</span>
+      </div>
+      <div class="footer-thanks">
+        <img
+          src="https://github.com/anvilco/html-pdf-invoice-template/raw/main/img/heart.png"
+          alt="heart"
+        />
+        <span>Thank you for your trust!</span>
+      </div>
+    </div>
+
+</div>
+
+  </body>
+</html>

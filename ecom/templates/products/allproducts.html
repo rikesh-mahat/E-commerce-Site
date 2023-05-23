@@ -4,6 +4,7 @@
 {%block start%}
 <section>
 {%for cat in allcategory%}
+{%if cat.products.count%}
   <div class="container my-5">
     <header class="mb-4">
       <h2>{{cat.category_name | title}}</h2>
@@ -15,14 +16,19 @@
       <div class="col-lg-3 col-md-6 col-sm-6 d-flex">
         <div class="card w-100 my-2 shadow-2-strong">
           
-          <img src="{{product.product_image.first.image.url}}" class="card-img-top zoomable-image"  style="aspect-ratio: 1 / 1" />
+          <img src="{{product.product_image.last.image.url}}" class="card-img-top zoomable-image"  style="aspect-ratio: 1 / 1" />
           
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title">{{product.name}}</h5>
+            <h5 class="card-title">{{product.product_name | truncatechars:35}}</h5>
             <p class="card-text">Rs {{product.price}}</p>
             <div class="card-footer d-flex align-items-end pt-3 px-0 pb-0 mt-auto">
+              {%if not product.is_sold%}
               <a href="{%url 'get_product' product.slug%}" class="btn btn-outline-dark shadow-0 me-1">View Item</a>
               <a href="" class="btn btn-light border px-2 pt-2 icon-hover"><i class="fas fa-heart fa-lg text-secondary px-1"></i></a>
+              {%else%}
+              <a href="" class="btn btn-outline-success shadow-0 me-1">Sold Out</a>
+              {%endif%}
+              
             </div>
           </div>
         </div>
@@ -32,6 +38,7 @@
     </div>
 
   </div>
+  {%endif%}
   {%endfor%}
 </section>
 

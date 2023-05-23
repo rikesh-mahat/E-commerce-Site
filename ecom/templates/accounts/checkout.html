@@ -26,14 +26,12 @@
                
                 <img
                   src="{{item.product_image.first.image.url}}"
-                  class="img-fluid rounded border"
-                  style="height: 96px; width: 96px"
-                  alt="{{item.product_name}} image"
+                  class="img-fluid rounded border" style="height: 96px; width: 96px;" alt="{{item.item.product_name}} image"
                 />
               </div>
               <div class="">
                 <a href="#" class="card-link text-dark">
-                  {{item.product_name}} <br />
+                  {{item.product_name | truncatechars:20}} <br />
                   {{item.category}}
                 </a>
                 <div class="card-text text-muted mb-2">

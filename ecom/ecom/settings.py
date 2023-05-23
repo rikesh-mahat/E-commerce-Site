@@ -123,8 +123,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-MEDIA_ROOT =  os.path.join(BASE_DIR, 'public/static') 
+# MEDIA_ROOT =  os.path.join(BASE_DIR, 'public/static') 
+# MEDIA_URL = '/media/'
+
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -142,3 +145,5 @@ EMAIL_HOST_PASSWORD = 'eaaluayyhjsiytis'
 KHALTI_TEST_PUBLIC_KEY = 'test_public_key_b0e3cbc8b2a745b1b7a2bfb78c4b778b'
 KHALTI_TEST_SECRET_KEY = 'test_secret_key_b799d0896a034ec8beb7d4fc9f5e2e75'
 KHALTI_API_URL = 'https://khalti.com/api/v2/payment/epay'
+
+LOGIN_URL = '/accounts/login/'

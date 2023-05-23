@@ -56,8 +56,11 @@
                   <h3 class="mb-0">My account</h3>
                   <hr/>
                   <div class="text-center">
+                  {%if profile.profile_image.url%}
                   <img class="rounded-circle img-profile" src="{{profile.profile_image.url}}" alt="{{user.first_name}} {{user.last_name}} profile picture" />
-
+                  {%else%}
+                  <img class="rounded-circle img-profile" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" alt="{{user.first_name}} {{user.last_name}} profile picture" />
+                  {%endif%}
                   <div class="mb-3 md-1">
                     <label for="formFileSm" class="form-label">Change Profile</label>
                     <div class="input-group justify-content-center">
@@ -131,18 +134,17 @@
       
   
       <div class="col-lg-5 my-2 overflow-auto scrollbar scrollbar-primary mx-auto" style="height:680px">
-      {%if carts.count%}
-      {%for cart in carts %}
-        
+        {%if count > 0 %}
+      {%for order in orders%}
       <div class="mb-3">
         <div
           class="card border-top border-bottom border-3"
           style="border-color: #9FA6B2 !important"
         >
           <div class="card-body p-5">
-            <h4 class="mb-3 " style="color: #42ba96">Order # <span clas="small">{{cart.orders.uid}} </span></h4>
+            <h4 class="mb-3 " style="color: #42ba96">Order # <span clas="small">{{order.uid}} </span></h4>
            
-            {%if cart.orders.payment_completed%}
+            {%if order.payment_completed%}
             <h6 class="mb-0">Status: <span class="badge rounded-pill badge-success">Paid</span></h6>
             {%else%}
             <p class="mb-0">Status: <span class="badge rounded-pill badge-danger">Unpaid</span></p>
@@ -152,10 +154,10 @@
             <div class="row">
               <div class="col">
                 
-                <p><span class="small text-muted mb-1">Ordered On: </span>{{cart.orders.created_at | date}}</p>
-                <p><span class="small text-muted mb-1">Billing Address: </span>{{cart.orders.shipping_address}}</p>
-                <p><span class="small text-muted mb-1">Mobile: </span>{{cart.orders.mobile}}</p>
-                <p><span class="small text-muted mb-1">Payment Option: </span> <span class="badge rounded-pill badge-success">{{cart.orders.payment_method}}</span></p>
+                <p><span class="small text-muted mb-1">Ordered On: </span>{{order.created_at | date}}</p>
+                <p><span class="small text-muted mb-1">Billing Address: </span>{{order.shipping_address}}</p>
+                <p><span class="small text-muted mb-1">Mobile: </span>{{order.mobile}}</p>
+                <p><span class="small text-muted mb-1">Payment Option: </span> <span class="badge rounded-pill badge-success">{{order.payment_method}}</span></p>
                 </div>
             </div>
             <hr/>
@@ -167,10 +169,10 @@
                 <div class="progress mb-2 mx-auto">
                   <div class="progress-bar progress-bar progress-bar-animated"
                     role="progressbar"
-                    aria-valuenow="{% if cart.orders.order_status == 'Order Received' %}0{% elif cart.orders.order_status == 'Order Processing' %}35{% elif cart.orders.order_status == 'On the Way' %}75{% else %}100{% endif %}"
+                    aria-valuenow="{% if order.order_status == 'Order Received' %}0{% elif order.order_status == 'Order Processing' %}35{% elif order.order_status == 'On the Way' %}75{% else %}100{% endif %}"
                     aria-valuemin="0"
                     aria-valuemax="100"
-                    style="width: {% if cart.orders.order_status == 'Order Received' %}0{% elif cart.orders.order_status == 'Order Processing' %}35{% elif cart.orders.order_status == 'On the Way' %}75{% else %}100{% endif %}%;max-width: 68%;;">
+                    style="width: {% if order.order_status == 'Order Received' %}0{% elif order.order_status == 'Order Processing' %}35{% elif order.order_status == 'On the Way' %}75{% else %}100{% endif %}%;max-width: 68%;;">
                   </div>
                 </div>
                 
@@ -178,25 +180,25 @@
                   <ul class="list-inline items d-flex justify-content-between">
                     <li class="list-inline-item items-list">
                       <p class="py-1 px-2 rounded text-white"
-                        style="background-color: {% if cart.orders.order_status == 'Order Received' %}#f37a27{% else %}#ddd{% endif %}">
+                        style="background-color: {% if order.order_status == 'Order Received' %}#f37a27{% else %}#ddd{% endif %}">
                         Ordered
                       </p>
                     </li>
                     <li class="list-inline-item items-list">
                       <p class="py-1 px-2 rounded text-white"
-                        style="background-color: {% if cart.orders.order_status == 'Order Processing' %}#f37a27{% else %}#ddd{% endif %}">
+                        style="background-color: {% if order.order_status == 'Order Processing' %}#f37a27{% else %}#ddd{% endif %}">
                         Order Processing
                       </p>
                     </li>
                     <li class="list-inline-item items-list">
                       <p class="py-1 px-2 rounded text-white"
-                        style="background-color: {% if cart.orders.order_status == 'On the Way' %}#f37a27{% else %}#ddd{% endif %};">
+                        style="background-color: {% if order.order_status == 'On the Way' %}#f37a27{% else %}#ddd{% endif %};">
                         On the way
                       </p>
                     </li>
                     <li class="list-inline-item items-list text-end" style="margin-right: 8px; margin-top:10px;">
                       <p class="py-1 px-2 rounded text-white"
-                        style="background-color: {% if cart.orders.order_status == 'Order Completed' %}#f37a27{% else %}#ddd{% endif %};">
+                        style="background-color: {% if order.order_status == 'Order Completed' %}#f37a27{% else %}#ddd{% endif %};">
                         Delivered
                       </p>
                     </li>
@@ -216,8 +218,8 @@
                 <a href="" class="btn btn-primary">View Details</a>
               </div> {% endcomment %}
               <div class="col-6 text-end">
-                {% if cart.orders.order_status == 'Order Received' or cart.orders.order_status == 'Order Processing'%}
-                    <a href="{%url 'cancel_order' cart.orders.uid%}" class="btn btn-outline-danger text-danger icon-hover-danger">Cancel Order</a>
+                {% if order.order_status == 'Order Received' or order.order_status == 'Order Processing'%}
+                    <a href="{%url 'cancel_order' order.uid%}" class="btn btn-outline-danger text-danger icon-hover-danger">Cancel Order</a>
                 {% endif %}
   
               </div>
@@ -227,7 +229,7 @@
           </div>
         </div>
       </div>
-        
+      
       {%endfor%}
       {%else%}
       <div class="col-lg-12">

@@ -2,34 +2,35 @@
 
 
 {% block start %}
-  <div class="container">
-    <h1>Create Product</h1>
+  <div class="container card py-5 px-5 mt-5 border">
+    <h1 class="mb-5">Add Product</h1>
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
-      <div class="form-group">
+      <div class="form-group mb-5">
         <label for="{{ form.product_name.id_for_label }}">Product Name:</label>
         {{ form.product_name }}
       </div>
-      <div class="form-group">
-        <label for="{{ form.category.id_for_label }}">Category:</label>
-        {{ form.category }}
+ 
+      <div class="form-group mb-5">
+        <label for="{{ form.category.id_for_label}}">Category:</label>
+        {{ form.category}}
       </div>
-      <div class="form-group">
+      <div class="form-group mb-5">
         <label for="{{ form.price.id_for_label }}">Price:</label>
         {{ form.price }}
       </div>
-      <div class="form-group">
+      <div class="form-group mb-5">
         <label for="{{ form.product_description.id_for_label }}">Description:</label>
         {{ form.product_description }}
       </div>
-      <div class="form-group">
+      <div class="form-group  mb-5 mt-4">
         <label for="{{ form.product_images.id_for_label }}">Images:</label>
         {{ form.product_images }}
         <div id="preview"></div>
       </div>
-      <button type="submit" class="btn btn-primary">Create Product</button>
+      <button type="submit" class="btn btn-dark">Create Product</button>
 
-     <a href="{%url 'home' %}"class="btn btn-secondary">Cancel</a> 
+     <a href="{%url 'my_product' %}"class="btn btn-secondary">Cancel</a> 
 
       <style>
         #preview img {

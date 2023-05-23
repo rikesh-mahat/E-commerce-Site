@@ -5,8 +5,7 @@ from .models import *
 
 class ProductImageAdmin(admin.StackedInline):
     model = ProductImages
-    
-
+    extra = 0
 
 class AdminProduct(admin.ModelAdmin):
     inlines = [ProductImageAdmin]

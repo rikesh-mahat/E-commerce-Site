@@ -43,12 +43,37 @@
           
           {%if request.user.is_authenticated%}
             <div class="d-flex align-items-center">
-              <a class="btn btn-primary" href="{%url 'checkout_cart' product.uid%}">Buy Product</a>
+              <a class="btn btn-dark" href="{%url 'checkout_cart' product.uid%}">Buy Product</a>
               &nbsp;&nbsp;
-              <a class="btn btn-outline-dark" href="">Add to Wishlist</a>              
-             
+              <a class="btn btn-outline-dark" href="{%url 'add_wishlist' product.uid%}">Add to Wishlist</a>              
+              &nbsp;&nbsp;
+              <a class="btn btn-outline-dark btn-md" href="">
+                <span class="text-md font-weight-bold">
+                  <i class="fas fa-eye fa-lg text-secondary px-1"></i> {{product.view_count}} Views
+
+                  <span style="font-size:0.8rem;"> <strong> / </strong></span>
+
+
+                  <i class="fas fa-heart fa-lg text-secondary px-1"></i>  {{product.wish_items.count}} Wishlist's
+              </span></a>      
             </div>
-            {%endif%}
+            {%else%}
+            <div class="d-flex align-items-center">
+              <a class="btn btn-dark" href="{%url 'checkout_cart' product.uid%}">Buy Product</a>
+              &nbsp;&nbsp;
+              <a class="btn btn-outline-dark" href="{%url 'add_wishlist' product.uid%}">Add to Wishlist</a>              
+              &nbsp;&nbsp;
+              <a class="btn btn-outline-dark btn-md" href="">
+                <span class="text-md font-weight-bold">
+                  <i class="fas fa-eye fa-lg text-secondary px-1"></i> {{product.view_count}} Views
+
+                  <span style="font-size:0.8rem;"> <strong> / </strong></span>
+
+
+                  <i class="fas fa-heart fa-lg text-secondary px-1"></i>  {{product.wish_items.count}} Wishlist's
+              </span></a>   
+            </div>
+           {%endif%}
 
 
           
@@ -64,14 +89,13 @@
     
     <h2 class="fw-bolder mb-4">Other products</h2>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-5 g-4">
-      
+      {%if products%}
       {% for product in products%}
       {%if product.slug != slug%}
       <div class="col">
-        
         <div class="card h-100">
           <div class="view overlay" style="height: 200px;">
-            <img class="card-img-top" src="{{ product.product_image.first.image.url }}" alt="{{ product.product_name | title }}" style="object-fit: cover; height: 100%; width: 100%;">
+            <img class="card-img-top" src="{{ product.product_image.last.image.url }}" alt="{{ product.product_name | truncatechars:15 }}" style="object-fit: cover; height: 100%; width: 100%;">
             <a href="{% url 'get_product' product.slug%}">
               <div class="mask rgba-white-slight"></div>
             </a>
@@ -80,9 +104,10 @@
           <div class="card-body p-4">
             <div class="text-center">
               <!-- Product name-->
-              <h5 class="fw-bolder">{{product.product_name | title}}</h5>
+              <h5 class="fw-bolder" style="height: 80px; overflow: hidden; text-overflow: ellipsis;">{{product.product_name | truncatechars:40}}</h5>
+              
               <!-- Product price-->
-              <span>{{product.price}}</span>
+              <span><strong>Price </strong>Rs {{product.price}}</span>
             </div>
           </div>
           <!-- Product actions-->
@@ -90,10 +115,13 @@
             <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'get_product' product.slug%}">View Item</a></div>
           </div>
         </div>
-        
       </div>
+      
       {%endif%}
       {%endfor%}
+      {%else%}
+      <h2 class="fw-bolder mb-4">No Other Products listed for sale</h2>
+      {%endif%}
     </div>
     
   </div>
@@ -141,9 +169,9 @@
   <div class="card mb-4" >
     <div class="card-body">
       <div class="d-flex flex-start align-items-center">
-        {%if comment.user.first_name%}
+        {%if comment.user.profile.profile_image%}
         <img class="rounded-circle shadow-1-strong me-3"
-        src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(19).webp" alt="avatar" width="60"
+        src="{comment.user.profile.profile_image}" alt="avatar" width="60"
         height="60" />
         {%else%}
           <img class="rounded-circle shadow-1-strong me-3"
@@ -153,13 +181,13 @@
         <div>
           <h6 class="fw-bold text-primary mb-1">{{comment.user.first_name}} {{comment.user.last_name}}</h6>
           <p class="text-muted small mb-0">
-            Shared publicly - {{comment.created_at}}
+            Commented - {{comment.created_at | timesince}} ago
           </p>
         </div>
       </div>
 
       <p class="mt-3 mb-4 pb-2">
-        {{comment.comment}}
+        {{comment.text}}
       </p>
 
       <div class="small d-flex justify-content-start">
@@ -190,7 +218,7 @@
               <div id="comment-error" style="display:none;color:red">Please enter a comment</div>
             </div>
             <div class="float-end mt-2 pt-1">
-              <button type="submit" class="btn btn-primary" id="submit-button">Submit</button>
+              <button type="submit" class="btn btn-primary" id="submit-button">Comment</button>
             </div>
           </form>
         </div>

@@ -12,6 +12,6 @@ class ProductForm(forms.ModelForm):
             'category': forms.Select(attrs={'class': 'form-control'}),
             'price': forms.NumberInput(attrs={'class': 'form-control'}),
             'product_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'product_images': forms.ClearableFileInput(attrs={'multiple': True}),
+            'product_images': forms.ClearableFileInput(attrs={'multiple': False}),
             'owner': forms.HiddenInput(),
         }

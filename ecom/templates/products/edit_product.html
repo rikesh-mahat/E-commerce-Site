@@ -1,43 +1,65 @@
 {% extends 'base/base.html' %}
 
+
 {% block start %}
-  <div class="container">
-    <h1 class="text-center" style="margin-top:2rem;">Edit Product</h1>
-    <form method="post" enctype="multipart/form-data" class="text-center">
+  <div class="container card py-5 px-5 mt-5 border">
+    <h1 class="mb-5">Add Product</h1>
+    <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
-      <div class="form-group text-left">
-        {{ form.product_name.label_tag }}
+      <div class="form-group mb-5">
+        <label for="{{ form.product_name.id_for_label }}">Product Name:</label>
         {{ form.product_name }}
       </div>
-      <div class="form-group text-left">
-        {{ form.category.label_tag }}
-        {{ form.category }}
+ 
+      <div class="form-group mb-5">
+        <label for="{{ form.category.id_for_label}}">Category:</label>
+        {{ form.category}}
       </div>
-      <div class="form-group text-left">
-        {{ form.price.label_tag }}
+      <div class="form-group mb-5">
+        <label for="{{ form.price.id_for_label }}">Price:</label>
         {{ form.price }}
       </div>
-      <div class="form-group text-left">
-        {{ form.product_description.label_tag }}
+      <div class="form-group mb-5">
+        <label for="{{ form.product_description.id_for_label }}">Description:</label>
         {{ form.product_description }}
       </div>
-      <div class="form-group text-left">
-        {{ form.product_images.label_tag }}
+      <div class="form-group  mb-5 mt-4">
+        <label for="{{ form.product_images.id_for_label }}">Images:</label>
         {{ form.product_images }}
+        <div id="preview"></div>
       </div>
-      {% if product_images %}
-        <div class="row">
-          {% for image in product_images %}
-            <div class="col-md-4">
-              <img src="/media/{{image.image.url }}"  class="img-thumbnail">
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-      <div class="text-left">
-      <button type="submit" class="btn btn-primary">Save Changes</button>
-      <a href="{% url 'my_product' %}" class="btn btn-secondary">Cancel</a>
-      </div>
+      <button type="submit" class="btn btn-dark">Update Product</button>
+
+     <a href="{%url 'my_product' %}"class="btn btn-secondary">Cancel</a> 
+
+      <style>
+        #preview img {
+          max-width: 300px;
+          max-height: 300px;
+        }
+      </style>
+
+      <script>
+        const input = document.querySelector('input[type="file"]');
+        input.addEventListener('change', previewImages);
+
+        function previewImages() {
+          const preview = document.querySelector('#preview');
+          preview.innerHTML = '';
+          const files = input.files;
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.addEventListener('load', function() {
+              const image = new Image();
+              image.src = reader.result;
+              preview.appendChild(image);
+            });
+            reader.readAsDataURL(file);
+          }
+        }
+      </script>
     </form>
   </div>
 {% endblock %}
+
