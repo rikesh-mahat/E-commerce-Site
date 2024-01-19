@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}
+  Checkout
+{% endblock %}
+{% load course_tags %}
+{% block content %}
+  <head>
+    <style>
+      .ajax-loader {
+        visibility: hidden;
+        background-color: rgba(255, 255, 255, 0.7);
+        position: absolute;
+        z-index: +100 !important;
+        width: 100%;
+        height: 100%;
+      }
+      
+      .ajax-loader img {
+        position: relative;
+        top: 50%;
+        left: 50%;
+      }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+  </head>
+  <div class="ajax-loader">
+    <img src="/Media/loading.gif" class="img-responsive" />
+  </div>
+  <!--      PAGE TITLE
+    ==================================================      -->
+  <header class="py-8 py-md-10" style="background-image: none;">
+    <div class="container text-center py-xl-2">
+      <h1 class="display-4 fw-semi-bold mb-0">Shop Checkout</h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-scroll justify-content-center">
+          <li class="breadcrumb-item">
+            <a class="text-gray-800" href="#">Home</a>
+          </li>
+          <li class="breadcrumb-item text-gray-800 active" aria-current="page">Shop Checkout</li>
+        </ol>
+      </nav>
+    </div>
+    <!-- Img -->
+    <img class="d-none img-fluid" src="...html" alt="..." />
+  </header>
+
+  <!--      SHOP CHECKOUT
+    ==================================================      -->
+  {% csrf_token %}
+
+  <div class="container pb-6 pb-xl-10">
+    <div id="order_review" class="woocommerce-checkout-review-order">
+      <div class="woocommerce-checkout-review-order-inner">
+        <h3 id="order_review_heading">Your order</h3>
+        <table class="shop_table woocommerce-checkout-review-order-table">
+          <thead>
+            <tr>
+              <th class="product-name">Product</th>
+              <th class="product-total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="cart_item">
+              <td class="product-name">{{ course.title }}</td>
+              <td class="product-total">
+                <span class="woocommerce-Price-amount amount">
+                  <span class="woocommerce-Price-currencySymbol">₹</span>
+                  {{ course.price }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="cart-subtotal">
+              <th>Discount</th>
+              <td>
+                <span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol"></span>{{ course.discount }}%</span>
+              </td>
+            </tr>
+
+            <tr class="order-total">
+              <th>Total</th>
+              <td>
+                <strong><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">₹</span>{% discount_calculation course.price course.discount %}</span></strong>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div id="payment" class="woocommerce-checkout-payment">
+        <div class="form-row place-order">
+          <!-- Place this where you need payment button -->
+          <button id="payment-button" class="btn btn-blue bg-darken dark-70 bg-blue btn-block">Pay with Khalti</button>
+
+          <!-- Place this where you need payment button -->
+          <!-- Paste this code anywhere in you body tag -->
+          <script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
+          <script>
+            var config = {
+                                // replace the publicKey with yours
+                                "publicKey": "test_public_key_2f9230fafcc24cdaa2ee9a541c1ca313",
+                                "productIdentity": "1234567890",
+                                "productName": "Dragon",
+                                "productUrl": "http://gameofthrones.wikia.com/wiki/Dragons",
+                                "paymentPreference": [
+                                    "KHALTI"
+                                    ],
+                                "eventHandler": {
+                                    onSuccess (payload) {
+                                      $.ajax({
+                                        type: 'POST',
+                                        url: '/verify_checkout',
+                                        data: {
+                                          result: payload,
+                                          csrfmiddlewaretoken: '{{ csrf_token }}',
+                                          course_id: '{{ course.id }}'
+                                        },
+                                        dataType: 'json',
+                                        beforeSend: function () {
+                                          $('.ajax-loader').css('visibility', 'visible')
+                                        },
+                                        complete: function () {
+                                          $('.ajax-loader').css('visibility', 'hidden')
+                                        },
+                                        success: function (data) {
+                                          if (data['status'] == "success"){
+                                            title = "Payment completed successfully"
+                                            text = '<h5>You can find the course in My Courses </h5>'
+                                            icon = "success"
+                                            confirmButtonText = "Go to My Courses"
+                                          }
+                                          else {
+                                            title = "Payment verification failed"
+                                            text = '<h6>Please try again, if issue presists contact us. <br>Please provide error_code: ERR_FAILED_VERIFICATION_' + data['token'] + ' </h6>'
+                                            icon = "error"
+                                            confirmButtonText = "Close"
+                                          }
+                                          Swal.fire({
+                                            title: title,
+                                            html: text,
+                                            icon: icon,
+                                            confirmButtonText: confirmButtonText
+                                          }).then(function(clicked) {
+                                            window.location.href = '/my-course';
+                                          });
+                                        },
+                                        failure: function () {
+                                          alert("Opps, DEVS didn't think this would happen. If issue presists, please contact us.")
+                                        }
+                                      })
+                                    },
+                                    onError (error) {
+                                        console.log(error);
+                                    },
+                                    onClose () {
+                                        console.log('widget is closing');
+                                    }
+                                }
+                            };
+
+                            var checkout = new KhaltiCheckout(config);
+                            var btn = document.getElementById("payment-button");
+                            btn.onclick = function () {
+                                // minimum transaction amount must be 10, i.e 1000 in paisa.
+                                checkout.show({amount: {% discount_calculation course.price course.discount %}*100});
+                            }
+                        </script>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}

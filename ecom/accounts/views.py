@@ -84,7 +84,7 @@ def login_user(request):
             else:
                 print("this view working")
                 return redirect('home')
-        messages.warning(request, "Sorry the password doesn't match")
+        messages.error(request, "Invalid Credentials")
         
     return render(request, 'accounts/login.html')
 
